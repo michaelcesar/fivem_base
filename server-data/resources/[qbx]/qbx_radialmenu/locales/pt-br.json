@@ -1,0 +1,57 @@
+{
+  "error": {
+    "no_people_nearby": "Nenhum jogador por perto.",
+    "no_vehicle_nearby": "Nenhum veículo por perto para desvirar.",
+    "no_vehicle_found": "Nenhum veículo encontrado.",
+    "extra_deactivated": "Extra %s foi desativado.",
+    "extra_not_present": "O extra %s não existe neste veículo.",
+    "not_driver": "Você não é o motorista do veículo.",
+    "vehicle_driving_fast": "Este veículo está rápido demais.",
+    "seat_occupied": "Este banco está ocupado.",
+    "race_harness_on": "Você está com cinto de competição. Não dá para trocar.",
+    "obj_not_found": "Não foi possível criar o objeto solicitado.",
+    "not_near_ambulance": "Você não está perto de uma ambulância.",
+    "far_away": "Você está longe demais.",
+    "not_kidnapped": "Você não sequestrou esta pessoa.",
+    "trunk_closed": "O porta-malas está fechado.",
+    "cant_enter_trunk": "Você não pode entrar neste porta-malas.",
+    "already_in_trunk": "Você já está no porta-malas.",
+    "someone_in_trunk": "Já tem alguém no porta-malas.",
+    "cancel_task": "Cancelado"
+  },
+  "progress": {
+    "flipping_car": "Desvirando o veículo..."
+  },
+  "success": {
+    "extra_activated": "Extra %s foi ativado.",
+    "entered_trunk": "Você está no porta-malas.",
+    "flipped_car": "Veículo desvirado com sucesso!"
+  },
+  "info": {
+    "no_variants": "Não parece haver variações para isto.",
+    "wrong_ped": "Este modelo de personagem não permite esta opção.",
+    "nothing_to_remove": "Você não tem nada para tirar.",
+    "already_wearing": "Você já está usando.",
+    "switched_seats": "Você agora está no %s."
+  },
+  "general": {
+    "command_description": "Abrir o Menu Radial",
+    "get_out_trunk_button": "[E] Sair do Porta-Malas",
+    "close_trunk_button": "[G] Fechar Porta-Malas",
+    "open_trunk_button": "[G] Abrir Porta-Malas",
+    "getintrunk_command_desc": "Entrar no Porta-Malas",
+    "putintrunk_command_desc": "Colocar o Jogador no Porta-Malas",
+    "gang_radial": "Gangue",
+    "job_radial": "Emprego"
+  },
+  "options": {
+    "flip": "Desvirar o Veículo",
+    "vehicle": "Veículo",
+    "emergency_button": "Botão de Emergência",
+    "driver_seat": "Banco do Motorista",
+    "passenger_seat": "Banco do Passageiro",
+    "other_seats": "Outro Banco",
+    "rear_left_seat": "Banco Traseiro Esquerdo",
+    "rear_right_seat": "Banco Traseiro Direito"
+  }
+}

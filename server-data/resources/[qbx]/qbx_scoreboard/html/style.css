@@ -1,0 +1,112 @@
+/* Servidor: colours and type only. The LAYOUT is upstream's, deliberately - an earlier pass here
+ * rewrote the rows from absolute positioning to flex, which was not what was asked for and left
+ * the panel showing its header and nothing else. See ADR-162.
+ *
+ * Tokens from `dev/ox_lib-src/web/src/theme/index.ts`: panel `#0f0f0f`, hairline
+ * `rgba(255,255,255,.14)`, `#f2f2f2` over `#a3a3a3`, Rajdhani for titles and Inter for rows. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Rajdhani:wght@600;700&display=swap');
+
+.container {
+  height: 100vh;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.scoreboard-block {
+  display: none;
+  border-radius: 3px;
+  position: absolute;
+  height: fit-content;
+  width: 40vh;
+  background-color: #0f0f0f;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.4);
+  right: 3vh;
+  top: 30vh;
+  margin: 1vh;
+}
+
+.scoreboard-header {
+  border-radius: 0;
+  position: relative;
+  width: 92%;
+  height: 5vh;
+  margin: 1.7vh 1.3vh 0vh 1.7vh;
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.scoreboard-header > p {
+  text-align: center;
+  font-weight: bold;
+  color: #f2f2f2;
+  padding: 1.3vh;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 2vh;
+  letter-spacing: 0.09em;
+}
+#status-tab-label {
+  position: absolute;
+  font-family: 'Inter', sans-serif;
+  right: 3vh;
+  font-weight: bold;
+}
+
+.info-beam-title {
+  position: absolute;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.3vh;
+  letter-spacing: 0.1vh;
+  left: 2.7vh;
+  line-height: 4vh;
+  font-weight: bold;
+  color: #d4d4d4;
+}
+
+.info-beam-title-players {
+  position: absolute;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.3vh;
+  letter-spacing: 0.1vh;
+  left: 2.4vh;
+  line-height: 4vh;
+  font-weight: bold;
+  color: #f2f2f2;
+}
+
+/* Servidor: white, explicitly. This rule carried no colour at all upstream - the player count got
+ * its own inline `style="color: #ededed"` in app.js, and stripping that inline style left the
+ * count inheriting the browser default, which is black on a #0f0f0f panel. Set here instead, so
+ * the count and the status icons both have a colour that belongs to the stylesheet. */
+.info-beam-status {
+  position: absolute;
+  font-family: 'Inter', sans-serif;
+  right: 3vh;
+  float: left;
+  text-align: left;
+  line-height: 4.25vh;
+  color: #f2f2f2;
+  font-variant-numeric: tabular-nums;
+}
+
+.scoreboard-info-beam {
+  margin-top: .3vh;
+  position: relative;
+  height: 4.25vh;
+  width: 100%;
+  border-bottom-left-radius: 2vh;
+  border-bottom-right-radius: 2vh;
+}
+
+.fa-times {
+  color: #e0554a;
+}
+
+.fa-check {
+  color: #3ecf7e;
+}
+
+.fa-clock {
+  color: #a3a3a3;
+}

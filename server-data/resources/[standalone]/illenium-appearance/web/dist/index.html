@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/src/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UI</title>
+    <!--
+      Server: this bundle ships no fonts of its own - no @font-face, no webfont import (the one
+      "@import" inside the built JS is a constant in emotion's CSS parser, and every "Inter"
+      substring is React's own __reactInternal*). shared/theme.lua's `fontFamily` is interpolated
+      straight into `font-family: '<name>', sans-serif`, so a name that is not actually loaded
+      falls back silently - which is what the stock "qb-core" theme's Poppins had been doing since
+      install.
+
+      Declared here in Vite's *source* template, not in the built `dist/index.html`: the build
+      regenerates that file every time, so keeping it there meant re-pasting this block after
+      every rebuild, with a silent fallback to the browser default as the failure mode when
+      someone forgot. Served from ox_lib over nui://, the same cross-resource font reference
+      Renewed-Banking's bank.css uses - ox_lib's fxmanifest exposes `web/build/**/*`, so no font
+      file is copied or added anywhere. See ADR-077 and ADR-078.
+    -->
+    <style>
+      @font-face {
+        font-family: 'Inter';
+        src: url('nui://ox_lib/web/build/fonts/Inter-Variable.ttf') format('truetype');
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Inter';
+        src: url('nui://ox_lib/web/build/fonts/Inter-Italic-Variable.ttf') format('truetype');
+        font-weight: 100 900;
+        font-style: italic;
+        font-display: swap;
+      }
+    </style>
+  <script type="module" crossorigin src="./assets/index.ebbf08f4.js"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+    
+</body>
+
+</html>

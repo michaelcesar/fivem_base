@@ -1,0 +1,18 @@
+{
+    "teleports": [
+        [
+            {
+                "_name": "Elevator @ labs",
+                "coords": [3540.74, 3675.59, 20.99, 167.5],
+                "allowVehicle": false,
+                "drawText": "[E] Subir de elevador.",
+                "ignoreGround": true
+            },
+            {
+                "coords": [3540.74, 3675.59, 28.11, 172.5],
+                "allowVehicle": false,
+                "drawText": "[E] Descer de elevador."
+            }
+        ]
+    ]
+}

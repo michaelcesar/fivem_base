@@ -1,0 +1,75 @@
+# FXServer binary (downloaded separately, platform-specific)
+/fxserver/
+
+# Server runtime data
+/server-data/cache/
+/server-data/logs/
+/server-data/*.log
+/fxserver_boot.log
+/server-data/server.cfg.local
+
+# Real server.cfg holds the license key and DB password - keep server.cfg.example in git instead
+/server-data/server.cfg
+/server-data/myLogo.png
+/server-data/.replxx_history
+
+# Resource dependencies (built/pulled, not source)
+node_modules/
+.pnpm-store/
+
+# Build output inside the dev/ forks. Each fork also carries upstream's own .gitignore, which
+# already covers these - these lines are the belt to that pair of braces, so a fork whose
+# .gitignore changes upstream cannot start committing 8MB of bundles by accident. The built
+# output that matters is the copy deployed under server-data/resources/, which IS tracked.
+/dev/**/dist/
+/dev/**/web/dist/
+
+# Env / secrets
+.env
+*.env.local
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Runtime logs written inside vendored resources
+/server-data/resources/**/*.log
+
+# Servidor: the remaining runtime logs. /fxserver_boot.log was already ignored, but the error
+# streams and the MariaDB console output are written beside it and were not - they were about to
+# be committed as part of the first push.
+/fxserver_boot.err.log
+/fxserver_boot_err.log
+/mariadb.log
+/mariadb.err.log
+/mariadb_boot.log
+/mariadb_boot_err.log
+
+# Documentation is local - only README.md (English) is versioned. CLAUDE.md/CLAUDE.pt.md,
+# AGENTS.md/AGENTS.pt.md and the whole docs/ tree stay on disk and never reach the repository.
+# Same treatment as juscia/toca ae/plannuscrm.
+*.md
+!README.md
+/docs/
+
+# AI assistant config/rules: local, same reasoning as the documentation above.
+.claude/
+.cursor/
+.context/
+/context/
+.github/copilot-instructions.md
+
+# First line of defence, ahead of any credential scan: a private key, service account or
+# client secret is never committed. The credential comes in through an environment variable.
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*-service-account.json
+*service-account*.json
+credentials*.json
+gcp-key*.json
+client_secret*.json
+secure/

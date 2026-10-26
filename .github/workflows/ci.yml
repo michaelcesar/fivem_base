@@ -1,0 +1,253 @@
+name: CI
+
+# This project has no build step and no network services to spin up - it's a FiveM/Lua
+# game server configuration, not a web backend. "CI" here is the subset of
+# scripts/pre-commit.sh's checks that make sense to re-run over the whole tracked tree on
+# every push and pull request, as a second line of defence behind the local git hook
+# (scripts/install-hooks.sh) - the same relationship juscia-api's secrets job has to its
+# own .gitignore. Each check is its own job so a failure is legible at a glance.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secrets:
+    name: Committed secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same patterns as scripts/pre-commit.sh check #3, run over every tracked file
+      # instead of just the staged diff - catches anything that slipped past the local
+      # hook (e.g. --no-verify) or was force-added before the hook was installed.
+      - name: Scan the tree for credentials
+        run: |
+          if git ls-files | grep -qx "server-data/server.cfg"; then
+            echo "::error::server-data/server.cfg is committed - it holds the licence key and DB password"
+            exit 1
+          fi
+
+          hits="$(git grep -nEI 'cfxk_[A-Za-z0-9_]{10,}|ServerDb_[A-Za-z0-9_!]+' -- . 2>/dev/null || true)"
+          if [[ -n "$hits" ]]; then
+            echo "::error::what looks like a real secret is committed:"
+            printf '%s\n' "$hits"
+            exit 1
+          fi
+
+          echo "No committed credentials."
+
+  diagnostics:
+    name: Leftover diagnostics
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same as scripts/pre-commit.sh check #2 - temporary instrumentation is expected
+      # while chasing a bug and is meant to come out afterwards. It has already been left
+      # behind once in this project.
+      - name: Scan srv_* resources for temporary instrumentation
+        run: |
+          hits="$(git grep -nE ':server:(trace|debug)|\[(TRACE|DEBUG)\]|TEMPORARY diagnostic' -- 'server-data/resources/*/srv_*/*.lua' 2>/dev/null || true)"
+          if [[ -n "$hits" ]]; then
+            echo "::error::temporary diagnostics still present:"
+            printf '%s\n' "$hits"
+            exit 1
+          fi
+          echo "No leftover diagnostics."
+
+  entity-deletion:
+    name: Local entity deletion
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same as scripts/pre-commit.sh check #4 - SetEntityAsMissionEntity(entity, true, ...)
+      # on a locally created entity makes the following DeleteEntity a silent no-op. A hit
+      # is forgiven when one of the five lines above it states `isNetwork = true`, same
+      # exception the local hook grants.
+      - name: Check SetEntityAsMissionEntity usage
+        shell: bash
+        run: |
+          failed=0
+          while IFS= read -r file; do
+            [[ -z "$file" ]] && continue
+
+            file_hits=""
+            while IFS= read -r hit; do
+              [[ -z "$hit" ]] && continue
+              line_no="${hit%%:*}"
+              context_start=$(( line_no > 5 ? line_no - 5 : 1 ))
+
+              if sed -n "${context_start},$(( line_no - 1 ))p" "$file" 2>/dev/null \
+                 | grep -q 'isNetwork = true'; then
+                continue
+              fi
+
+              file_hits+="$hit"$'\n'
+            done <<< "$(grep -nE 'SetEntityAsMissionEntity\([^,]+,\s*true' "$file" 2>/dev/null)"
+
+            if [[ -n "${file_hits//[$'\n']/}" ]]; then
+              echo "::error::$file - local entity claimed as networked, use exports.srv_lib:DeleteLocalEntity(entity):"
+              printf '%s\n' "${file_hits%$'\n'}"
+              failed=1
+            fi
+          done < <(git ls-files 'server-data/resources/*/srv_*/*.lua')
+
+          if [[ "$failed" -eq 1 ]]; then
+            exit 1
+          fi
+          echo "Entity deletion looks correct."
+
+  lua-static-analysis:
+    name: Lua static analysis (lua-language-server)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Best-effort: the binary isn't preinstalled on GitHub-hosted runners and this project
+    # has only ever installed it on the Windows dev machine (see scripts/pre-commit.sh
+    # check #6 and dev/fivem-lls-addon). If the download step fails or finds nothing to
+    # check, don't block merges on tooling availability - the local pre-commit hook is the
+    # authoritative run of this check on a machine known to have the binary.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: List srv_* resources
+        id: resources
+        run: |
+          resources="$(git ls-files 'server-data/resources/*/srv_*/*.lua' | xargs -n1 dirname | sort -u)"
+          echo "resources<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$resources" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Install lua-language-server
+        if: steps.resources.outputs.resources != ''
+        env:
+          # Authenticated requests get a 5000/hr GitHub API rate limit instead of the
+          # 60/hr unauthenticated limit shared across every runner on GitHub's IP pool -
+          # that shared pool is exactly what made this fail intermittently before.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # The release asset name carries the version (e.g.
+          # lua-language-server-3.13.6-linux-x64.tar.gz) - there's no stable
+          # unversioned filename, so resolve it from the latest release instead of
+          # guessing it.
+          #
+          # This whole block runs with `set +e`: the job's default `bash -eo pipefail`
+          # would otherwise let a failing curl kill the script before the `-z` fallback
+          # below ever runs, defeating the fallback entirely. That's what actually
+          # happened the first time this step was written.
+          set +e
+          asset_url="$(curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" \
+            https://api.github.com/repos/LuaLS/lua-language-server/releases/latest \
+            | grep -oE '"browser_download_url": *"[^"]+linux-x64\.tar\.gz"' \
+            | head -n1 | cut -d'"' -f4)"
+          set -e
+
+          if [[ -z "$asset_url" ]]; then
+            echo "::warning::could not resolve the lua-language-server linux-x64 release asset - skipping static analysis"
+            exit 0
+          fi
+
+          if ! curl -fsSL -o lls.tar.gz "$asset_url"; then
+            echo "::warning::download of $asset_url failed - skipping static analysis"
+            exit 0
+          fi
+
+          mkdir -p lua-language-server
+          tar -xzf lls.tar.gz -C lua-language-server
+
+      - name: Run static analysis (undefined-field, need-check-nil)
+        if: steps.resources.outputs.resources != ''
+        run: |
+          if [[ ! -x ./lua-language-server/bin/lua-language-server ]]; then
+            echo "::warning::lua-language-server binary not installed - skipping static analysis"
+            exit 0
+          fi
+
+          # .luarc.json's `workspace.library` entries are relative, but lua-language-server's
+          # --check mode resolves a relative library path against the directory being checked,
+          # not the workspace root or --configpath's directory - so as written they resolve to
+          # nothing once --check targets a single resource subfolder, and every native/vector
+          # type the FiveM stub library (dev/fivem-lls-addon) provides silently disappears,
+          # producing a wall of bogus undefined-field hits on ordinary `.x`/`.y`/`.z` vector
+          # access. Confirmed by testing both variants directly. The fix is to resolve those
+          # paths to absolute before handing the config to the tool.
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            const root = process.cwd();
+            const cfg = JSON.parse(fs.readFileSync('.luarc.json', 'utf8'));
+            if (Array.isArray(cfg['workspace.library'])) {
+              cfg['workspace.library'] = cfg['workspace.library'].map(
+                (p) => (path.isAbsolute(p) ? p : path.join(root, p)),
+              );
+            }
+            fs.writeFileSync('/tmp/luarc-resolved.json', JSON.stringify(cfg));
+          "
+
+          failed=0
+          while IFS= read -r resource; do
+            [[ -z "$resource" ]] && continue
+
+            checkdir="$(mktemp -d)"
+            ./lua-language-server/bin/lua-language-server \
+              --check="$PWD/$resource" --configpath="/tmp/luarc-resolved.json" \
+              --check_format=json --checklevel=Warning --logpath="$checkdir" || true
+
+            if [[ -f "$checkdir/check.json" ]]; then
+              hits="$(node -e "
+                const fs = require('fs');
+                const d = JSON.parse(fs.readFileSync(process.argv[1], 'utf8'));
+                const wanted = new Set(['undefined-field', 'need-check-nil']);
+                for (const file in d) {
+                  for (const diag of d[file]) {
+                    if (!wanted.has(diag.code)) continue;
+                    const path = decodeURIComponent(file.replace('file:///', ''));
+                    console.log(path + ':' + (diag.range.start.line + 1) + ': [' + diag.code + '] ' + diag.message.split('\n')[0]);
+                  }
+                }
+              " "$checkdir/check.json" 2>/dev/null)"
+
+              if [[ -n "$hits" ]]; then
+                echo "::error::lua-language-server found real issues in $resource:"
+                printf '%s\n' "$hits"
+                failed=1
+              fi
+            else
+              echo "::warning::lua-language-server produced no check.json for $resource - tool likely failed to run, not treated as a hard failure here"
+            fi
+
+            rm -rf "$checkdir"
+          done <<< "${{ steps.resources.outputs.resources }}"
+
+          if [[ "$failed" -eq 1 ]]; then
+            exit 1
+          fi
+
+  vendored-resources:
+    name: Vendored resource edits (reminder)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same spirit as scripts/pre-commit.sh check #5, warning-only here too: docs/patches.md
+      # is local-only (gitignored), so CI has no file to confirm against - this is purely a
+      # visible nudge in the job log for whoever is reviewing the PR.
+      - name: List third-party files changed by this project
+        run: |
+          vendored="$(git ls-files 'server-data/resources/*' | grep -v '/srv_' | grep -v 'ox_lib/web/build/' || true)"
+          if [[ -n "$vendored" ]]; then
+            echo "::warning::third-party resource files are tracked - make sure local edits are recorded in docs/patches.md (local file, not in this repo)"
+          fi
+          echo "Done (reminder-only, never fails)."

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Fleeca</title>
+    <link rel="stylesheet" href="bank.css" />
+</head>
+<body>
+    <div id="app" class="hidden">
+        <div class="bank-window">
+            <header class="bank-header">
+                <div class="brand">
+                    <span class="brand-mark">Fleeca</span>
+                    <span class="atm-tag hidden" id="atmTag">Caixa Eletrônico</span>
+                </div>
+                <button class="close-btn" id="closeBtn" title="Fechar">&times;</button>
+            </header>
+
+            <div class="account-tabs" id="accountTabs"></div>
+
+            <div class="content-grid">
+                <div class="main-col">
+                    <div class="balance-card">
+                        <div class="balance-card-top">
+                            <div>
+                                <div class="balance-name" id="accountName">-</div>
+                                <div class="balance-type" id="accountType">-</div>
+                            </div>
+                            <div class="balance-frozen hidden" id="frozenTag">Congelada</div>
+                        </div>
+                        <div class="balance-label">Saldo disponível:</div>
+                        <div class="balance-amount" id="balanceAmount">$ 0</div>
+                        <div class="balance-cash hidden" id="balanceCash"></div>
+                    </div>
+
+                    <div class="action-row">
+                        <button class="action-btn deposit" data-action="deposit">
+                            <span class="action-icon">&darr;</span>
+                            <span>Depositar</span>
+                        </button>
+                        <button class="action-btn withdraw" data-action="withdraw">
+                            <span class="action-icon">&uarr;</span>
+                            <span>Sacar</span>
+                        </button>
+                        <button class="action-btn transfer" data-action="transfer">
+                            <span class="action-icon">&#8646;</span>
+                            <span>Transferir</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="trans-col">
+                    <div class="trans-heading">
+                        <h2>Transações</h2>
+                        <button class="export-btn" id="exportBtn" title="Exportar transações">Exportar</button>
+                    </div>
+                    <input class="trans-search" type="text" id="transSearch" placeholder="Buscar por mensagem, ID ou destinatário..." />
+                    <div class="trans-list" id="transList">
+                        <div class="trans-empty" id="transEmpty">Nenhuma transação encontrada</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="actionModal">
+        <div class="modal-card">
+            <h3 id="modalTitle">Depositar</h3>
+            <div class="form-group">
+                <label>Valor:</label>
+                <input type="number" id="amountInput" min="1" step="1" placeholder="0" autocomplete="off" />
+            </div>
+            <div class="form-group hidden" id="transferGroup">
+                <label>Conta ou ID do cidadão de destino:</label>
+                <input type="text" id="transferTarget" placeholder="Ex: 1001" autocomplete="off" />
+            </div>
+            <div class="form-group">
+                <label>Comentário (opcional):</label>
+                <input type="text" id="commentInput" placeholder="Ex: aluguel" autocomplete="off" />
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="modalCancel">Cancelar</button>
+                <button class="btn-confirm" id="modalConfirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="bank-window loading-window">
+            <div class="spinner"></div>
+            <div class="loading-text" id="loadingText">Conectando à agência...</div>
+        </div>
+    </div>
+
+    <script src="bank.js"></script>
+</body>
+</html>

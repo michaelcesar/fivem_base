@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>srv_trade</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="trade" class="trade-wrapper hidden">
+      <!-- Left column: what I am offering on top, what I own below. -->
+      <div class="trade-column">
+        <div class="inventory-grid-wrapper">
+          <div>
+            <div class="inventory-grid-header-wrapper">
+              <p>Minha oferta</p>
+              <p id="mine-confirmed" class="trade-status"></p>
+            </div>
+            <div class="trade-bar"><div id="mine-bar" class="trade-bar-fill"></div></div>
+          </div>
+          <div id="mine-offer" class="inventory-grid-container trade-offer-grid"></div>
+        </div>
+
+        <div class="inventory-grid-wrapper">
+          <div>
+            <div class="inventory-grid-header-wrapper">
+              <p>Meu inventário</p>
+              <p id="inventory-weight"></p>
+            </div>
+            <div class="trade-bar"><div id="inventory-bar" class="trade-bar-fill"></div></div>
+          </div>
+          <div id="inventory" class="inventory-grid-container"></div>
+        </div>
+      </div>
+
+      <!-- Middle column: the two buttons, and nothing else. -->
+      <div class="inventory-control">
+        <div class="inventory-control-wrapper">
+          <button id="confirm" class="inventory-control-button">Confirmar</button>
+          <button id="cancel" class="inventory-control-button">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- Right column: their offer only. Their inventory is not mine to see. -->
+      <div class="trade-column trade-column-right">
+        <div class="inventory-grid-wrapper">
+          <div>
+            <div class="inventory-grid-header-wrapper">
+              <p id="theirs-label">Oferta</p>
+              <p id="theirs-confirmed" class="trade-status"></p>
+            </div>
+            <div class="trade-bar"><div id="theirs-bar" class="trade-bar-fill"></div></div>
+          </div>
+          <div id="theirs-offer" class="inventory-grid-container trade-offer-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shift-drag asks how many, in the same card shape every other prompt in the project uses. -->
+    <div id="amount" class="trade-amount-overlay hidden">
+      <div class="trade-amount-dialog">
+        <p class="trade-amount-title">Quantidade</p>
+        <p id="amount-item" class="trade-amount-item"></p>
+        <input id="amount-input" class="inventory-control-input" type="number" min="1" />
+        <div class="trade-amount-buttons">
+          <button id="amount-confirm" class="inventory-control-button">Confirmar</button>
+          <button id="amount-cancel" class="inventory-control-button">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

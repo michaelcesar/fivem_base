@@ -1,0 +1,340 @@
+/*
+  Servidor: the trade screen.
+
+  Every value here is copied from ox_inventory's own stylesheet (web/src/index.scss) rather than
+  invented, because the point of this screen is that it does not look like a different program:
+  same slot size, same colours, same label boxes, same control buttons. The SCSS variables it uses
+  are inlined as CSS custom properties below, with their original names, so the two can be diffed.
+
+  Only three things here have no counterpart in ox_inventory, and each is marked: the two-row offer
+  grid, the confirmation bar, and the quantity dialog.
+*/
+
+:root {
+  --main-color: #22232c;
+  --text-color: #c1c2c5;
+  --main-font: Roboto;
+
+  --secondary-color: rgba(12, 12, 12, 0.4);
+  --secondary-color-highlight: #33343f;
+  --secondary-color-dark: rgba(12, 12, 12, 0.8);
+
+  --grid-cols: 5;
+  --grid-size: 10.2vh;
+  --grid-gap: 2px;
+
+  /* ox_inventory: $containerSize, 5 rows. The inventory panel keeps it and scrolls. */
+  --container-size: calc(5 * (var(--grid-size) + 0.22vh) + 5 * var(--grid-gap));
+  /* Servidor: the offer grids are two rows - ten slots, which is Config.offerSlots. */
+  --offer-size: calc(2 * (var(--grid-size) + 0.22vh) + 2 * var(--grid-gap));
+
+  --accent: #4f9d54;
+  --danger: #9d4f4f;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: none;
+  color: #fff;
+  user-select: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+p {
+  margin: 0;
+  padding: 0;
+  font-family: var(--main-font);
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ox_inventory: .inventory-wrapper */
+.trade-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  gap: 20px;
+}
+
+/* Servidor: the left side stacks two panels, which ox_inventory never does - it only ever has one
+   grid per side. The gap matches the gap between the columns so the whole thing reads as a grid. */
+.trade-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* The right column has only the offer, so it is aligned to the top of the left column's offer
+   rather than centred against both panels. */
+.trade-column-right {
+  align-self: flex-start;
+  margin-top: calc(50vh - var(--offer-size) - 100px);
+}
+
+/* ox_inventory: .inventory-grid-wrapper */
+.inventory-grid-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--grid-gap) * 2);
+}
+
+/* ox_inventory: .inventory-grid-header-wrapper */
+.inventory-grid-header-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.inventory-grid-header-wrapper p {
+  font-size: 16px;
+}
+
+/* ox_inventory: .inventory-grid-container */
+.inventory-grid-container {
+  display: grid;
+  height: var(--container-size);
+  grid-template-columns: repeat(var(--grid-cols), var(--grid-size));
+  grid-auto-rows: calc(var(--grid-size) + 0.22vh);
+  gap: var(--grid-gap);
+  overflow-y: scroll;
+}
+
+/* Servidor: an offer is two fixed rows and never scrolls - it is a fixed number of slots, not a
+   variable list, so a scrollbar there would be a lie. */
+.trade-offer-grid {
+  height: var(--offer-size);
+  grid-auto-rows: calc(var(--grid-size) + 0.22vh);
+  overflow-y: hidden;
+}
+
+/* ox_inventory: .inventory-slot */
+.inventory-slot {
+  background-color: var(--secondary-color);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 7vh;
+  border-radius: 2.5%;
+  image-rendering: -webkit-optimize-contrast;
+  position: relative;
+  color: var(--text-color);
+  border-color: rgba(0, 0, 0, 0.2);
+  border-style: inset;
+  border-width: 1px;
+}
+
+/* Servidor: only my own slots can be picked up. Their offer is a display, and a grab cursor over it
+   would promise something the server would refuse. */
+.inventory-slot.draggable {
+  cursor: grab;
+}
+
+.inventory-slot.drop-hover {
+  background-color: var(--secondary-color-highlight);
+}
+
+/* ox_inventory: .item-slot-wrapper */
+.item-slot-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.item-slot-wrapper p {
+  font-size: 12px;
+}
+
+/* ox_inventory: .item-slot-header-wrapper */
+.item-slot-header-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+/* ox_inventory: .item-slot-info-wrapper */
+.item-slot-info-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-self: flex-end;
+  padding: 3px;
+  gap: 3px;
+}
+
+.item-slot-info-wrapper p {
+  font-size: 12px;
+}
+
+/* ox_inventory: .inventory-slot-label-box */
+.inventory-slot-label-box {
+  background-color: var(--main-color);
+  color: var(--text-color);
+  text-align: center;
+  border-bottom-left-radius: 0.25vh;
+  border-bottom-right-radius: 0.25vh;
+  border-top-color: rgba(0, 0, 0, 0.2);
+  border-top-style: inset;
+  border-top-width: 1px;
+}
+
+/* ox_inventory: .inventory-slot-label-text */
+.inventory-slot-label-text {
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 2px 3px;
+  font-weight: 400;
+  font-family: var(--main-font);
+  font-size: 12px;
+}
+
+/* ox_inventory: .inventory-slot-number */
+.inventory-slot-number {
+  background-color: white;
+  color: black;
+  height: 12px;
+  border-top-left-radius: 0.25vh;
+  border-bottom-right-radius: 0.25vh;
+  padding: 3px;
+  font-size: 12px;
+  font-family: var(--main-font);
+}
+
+/* ox_inventory: .inventory-control and its children */
+.inventory-control {
+  display: flex;
+}
+
+.inventory-control-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+}
+
+.inventory-control-button {
+  font-size: 14px;
+  color: #fff;
+  background-color: var(--secondary-color);
+  transition: 200ms;
+  padding: 12px 8px;
+  border-radius: 2.5%;
+  border: none;
+  text-transform: uppercase;
+  font-family: var(--main-font);
+  width: 100%;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.inventory-control-button:hover {
+  background-color: var(--secondary-color-dark);
+}
+
+.inventory-control-button:active {
+  transform: translateY(3px);
+}
+
+/* Servidor: confirming is a state, not an action - the button stays pressed to say so, and pressing
+   it again withdraws the confirmation. Without this the player has no way to tell whether their own
+   click registered. */
+.inventory-control-button.active {
+  background-color: var(--accent);
+}
+
+.inventory-control-input {
+  transition: 200ms;
+  padding: 16px 8px;
+  border-radius: 2.5%;
+  font-family: var(--main-font);
+  font-size: 16px;
+  text-align: center;
+  outline: none;
+  border: none;
+  color: #fff;
+  background-color: var(--secondary-color);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.inventory-control-input:focus-within {
+  background-color: var(--secondary-color-dark);
+}
+
+/* Servidor: ox_inventory's weight bar, reused for two jobs - the real weight on the inventory panel,
+   and the confirmation state on each offer. Both are "a bar that fills", which is why it works. */
+.trade-bar {
+  background: rgba(0, 0, 0, 0.4);
+  height: 3px;
+  overflow: hidden;
+}
+
+.trade-bar-fill {
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  transition: width 200ms, background-color 200ms;
+}
+
+.trade-bar-fill.pending {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.trade-status {
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+.trade-status.confirmed {
+  color: var(--accent);
+}
+
+/* Servidor: the quantity prompt shift-drag opens. Same card as the useful-controls dialog in
+   ox_inventory (.useful-controls-dialog): main colour, 16px padding, 4px radius, 16px gaps. */
+.trade-amount-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.trade-amount-dialog {
+  background-color: var(--main-color);
+  color: var(--text-color);
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border-radius: 4px;
+  gap: 16px;
+}
+
+.trade-amount-title {
+  font-size: 18px;
+}
+
+.trade-amount-item {
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+.trade-amount-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}

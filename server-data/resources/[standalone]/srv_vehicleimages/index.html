@@ -1,0 +1,12 @@
+<!doctype html>
+<!--
+  Servidor: intentionally blank. FiveM only mounts a resource's `files` into the NUI filesystem
+  (`nui://<resource>/...`) when that resource declares a `ui_page` - confirmed against every
+  resource on this server that serves NUI assets (ox_inventory, npwd, illenium-appearance,
+  qbx_hud all have `ui_page`; loadscreen has the equivalent `loadscreen` directive). Without one
+  the images are on disk and the resource starts fine, but every `nui://` request 404s silently.
+
+  This page is never shown: nothing calls SetNuiFocus or SendNUIMessage for this resource. It
+  exists purely so the images below it are reachable. See ADR-075.
+-->
+<html><head><meta charset="utf-8"><title>srv_vehicleimages</title></head><body></body></html>

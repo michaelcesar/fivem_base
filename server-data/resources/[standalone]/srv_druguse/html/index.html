@@ -1,0 +1,131 @@
+<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.13.0/css/all.css"/>
+
+<div id="strip" class="hidden"></div>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap');
+
+  html, body { background: transparent !important; margin: 0; overflow: hidden; }
+
+  /* Servidor: a single line, not a panel.
+     
+     This was a bordered 208px card with labelled rows, sitting centre-top - which is the worst
+     place on the screen to put a box, because it is where the eye already is during a fight. The
+     information is worth showing and the chrome around it was not: no border, no background plate,
+     no headings, one row. What is left is only the figures. */
+  #strip {
+    position: absolute;
+    top: 1.1vh;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+
+    /* Dim by default. It is a status line, not an alert - it should be readable when looked at
+       and invisible when not. */
+    opacity: .62;
+
+    /* A shadow instead of a background: it stays legible over a bright sky and over dark tarmac
+       without painting a rectangle over either. */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .95), 0 0 8px rgba(0, 0, 0, .7);
+    color: #f2f2f2;
+  }
+
+  #strip.hidden { display: none; }
+
+  .chip { display: flex; align-items: center; gap: 4px; }
+  .chip i { font-size: 10px; color: #d0d0d0; }
+
+  /* The last five seconds, and the only thing here allowed to draw attention - it is the one
+     state the player can still act on. */
+  .chip.ending { color: #ff9500; }
+  .chip.ending i { color: #ff9500; }
+
+  .sep { width: 1px; height: 9px; background: rgba(255, 255, 255, .3); }
+
+  .stat { color: #3ecf7e; }
+  .stat.capped { color: #ff9500; }
+  .stat.none { display: none; }
+</style>
+
+<script>
+  const strip = document.getElementById('strip');
+
+  function clock(ms) {
+    const total = Math.ceil(ms / 1000);
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
+  function chip(effect) {
+    const el = document.createElement('span');
+    el.className = 'chip' + (effect.remaining <= 5000 ? ' ending' : '');
+    el.title = effect.label;
+
+    const icon = document.createElement('i');
+    icon.className = 'fas fa-' + effect.icon;
+
+    const time = document.createElement('span');
+    time.textContent = clock(effect.remaining);
+
+    el.appendChild(icon);
+    el.appendChild(time);
+
+    return el;
+  }
+
+  window.addEventListener('message', (event) => {
+    const data = event.data;
+
+    if (data.action === 'hide') {
+      strip.classList.add('hidden');
+      return;
+    }
+
+    if (data.action !== 'show') return;
+
+    strip.innerHTML = '';
+
+    // Lua's array arrives as a plain object when it has one entry, so this tolerates both.
+    const effects = Array.isArray(data.effects) ? data.effects : Object.values(data.effects || {});
+
+    for (const effect of effects) strip.appendChild(chip(effect));
+
+    const boosted = data.speed > 1.001;
+    const stamina = Math.round(data.stamina);
+
+    // The separator only earns its place when there is something on both sides of it.
+    if (boosted || stamina > 0) {
+      const sep = document.createElement('span');
+      sep.className = 'sep';
+      strip.appendChild(sep);
+    }
+
+    if (boosted) {
+      const el = document.createElement('span');
+      el.className = 'stat' + (data.capped ? ' capped' : '');
+      el.title = data.capped ? 'Velocidade no teto do jogo' : 'Velocidade';
+      el.textContent = '×' + data.speed.toFixed(2);
+      strip.appendChild(el);
+    }
+
+    if (stamina > 0) {
+      const el = document.createElement('span');
+      el.className = 'stat';
+      el.title = 'Chance de recuperar vigor por segundo';
+      el.textContent = '+' + stamina + '%';
+      strip.appendChild(el);
+    }
+
+    strip.classList.remove('hidden');
+  });
+</script>

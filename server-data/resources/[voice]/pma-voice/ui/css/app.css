@@ -1,0 +1,51 @@
+/* Server: the voice indicator, restyled onto this project's design system.
+ *
+ * Upstream shipped 12px Avenir in a mid-grey with a four-way black text-shadow, which matched
+ * nothing else on this server. Tokens here come from `dev/ox_lib-src/web/src/theme/index.ts`:
+ * Rajdhani for the display face, `#f2f2f2` for live text, `#a3a3a3` for the label.
+ *
+ * The mode names themselves are translated in `shared.lua` (`Cfg.voiceModes`), and the English
+ * suffixes " [Range] " / " Mhz [Radio] " / " [Call] " were removed from `ui/js/app.js`, which is a
+ * built bundle - they are plain string literals in it, so the edit is a substitution and not a
+ * rebuild. `ui/js/app.js.bak` holds the original. See ADR-159.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap');
+
+.voiceInfo {
+  position: fixed;
+  /* Server: top, not bottom. The bottom band is where the FiveM watermark and the game's own
+     notices sit, and the hotbar occupies the middle of it. */
+  right: 12px;
+  top: 8px;
+  padding: 0;
+  text-align: right;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f2f2f2;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
+}
+
+/* The label. `::before` on the container rather than on a `<p>`, because which `<p>` is last
+   depends on whether a call and a radio channel happen to be active. */
+.voiceInfo::before {
+  content: 'Alcance da voz';
+  display: block;
+  margin-bottom: 1px;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: #a3a3a3;
+}
+
+p {
+  margin: 0;
+}
+
+/* `.talking` is applied by the app while the mic is actually open. Green for transmitting - the
+   same green the status ring and the HUD's own microphone panel use, so all three agree. */
+.talking {
+  color: #3ecf7e;
+}

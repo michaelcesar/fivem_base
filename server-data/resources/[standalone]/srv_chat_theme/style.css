@@ -1,0 +1,179 @@
+/* Servidor: the project's own monochrome HUD palette and fonts (ox_lib's `gfx` theme -
+   dev/ox_lib-src/web/src/theme/index.ts - and its Rajdhani/Inter font pair), applied to the base
+   FXServer `chat` resource via its own theming extension point. This stylesheet loads *after*
+   the base chat's index.css, not instead of it, so anything that needs to win over a base rule
+   uses `!important` - the same approach Cfx.re's own chat-theme-gtao example already uses. */
+
+@font-face {
+  font-family: 'Rajdhani';
+  src: url('fonts/Rajdhani-SemiBold.ttf') format('truetype');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: 'Rajdhani';
+  src: url('fonts/Rajdhani-Medium.ttf') format('truetype');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('fonts/Inter-Variable.ttf') format('truetype-variations');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 100 900;
+}
+
+* {
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* Servidor: every position and size here is in `vh`/`vw`, not the base chat's percentages.
+   The base positions the input with `top: 23.8%` - a hand-tuned number meant to land just under
+   a 22%-tall window - so any change to the window's height silently leaves a gap between the two
+   or overlaps them. Expressing both in the same unit and deriving the input's `top` from the
+   window's own `top + height` keeps them flush by construction. */
+/* Servidor: `width`/`height` need `!important` for a reason that is not obvious from the CSS -
+   the base chat renders this element as `<div class="chat-window" :style="style">`, and its own
+   default config carries `style: { background, width: '38vw', height: '22%' }`. Those arrive as
+   an *inline* style, which outranks any stylesheet rule that is not `!important`, so the two
+   values below were silently discarded: the window rendered at 38vw (clamped by the max-width
+   here to 560px) while `.chat-input` - which has no inline style - honoured its own 26vw and came
+   out ~60px narrower, and the window's 22% height ran past the input's `top`, overlapping it.
+   Reported as the input "not being 100% width"; the input was right and the window was wrong.
+   `background-color` already carried `!important` for exactly this collision, which is why the
+   colour looked correct while the geometry did not. See ADR-047. */
+.chat-window {
+  top: 1vh;
+  left: 0.6vw;
+  width: 26vw !important;
+  height: 14vh !important;
+  max-width: 560px;
+  background-color: rgba(5, 5, 5, 0.18) !important;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-sizing: border-box;
+}
+
+.chat-messages {
+  height: 100%;
+  font-size: 1.05vh;
+  margin: 0;
+  padding: 0.5vh 0.7vh;
+  box-sizing: border-box;
+}
+
+.msg {
+  margin-bottom: 0.15vh;
+  color: #f2f2f2;
+}
+
+/* Player name / templated prefix inside a message - Rajdhani, the HUD theme's display face, so
+   a name reads slightly heavier than the message body beside it. */
+.msg b {
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 600;
+}
+
+/* 1vh + 14vh + 0.4vh gap - directly under the window above, same left edge, same width. */
+.chat-input {
+  font-size: 1vh;
+  top: 15.4vh;
+  left: 0.6vw;
+  width: 26vw;
+  max-width: 560px;
+  box-sizing: border-box;
+}
+
+.chat-input > div.input {
+  /* `display`/`align-items` restate the base's own values on purpose: the field filling this bar
+     depends on this staying a flex row, so it should not break silently if the base ever changes
+     them. */
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  box-sizing: border-box;
+  /* The bar owns the padding, not the field - see the textarea rule below for why that matters.
+     Same visual spacing as before, just moved one level up. */
+  padding: 0.6vh 0.8vh;
+  background-color: rgba(5, 5, 5, 0.3) !important;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Servidor: no input icon, by request - the mode prefix (a bracketed label like "[ALL]") the base
+   chat renders before the text field is hidden outright rather than restyled.
+   `!important`: the base gives it `display: inline-block` and a `padding-left`, so if this rule
+   ever loses the cascade the span reappears as dead space at the left of the bar and the field
+   no longer starts at the edge. Reported as the field not filling the bar; the empty prefix is
+   the only element inside the bar that can take width from it. */
+.prefix {
+  display: none !important;
+}
+
+/* `flex: 1` plus a zero basis makes the field take the whole bar now that the prefix beside it is
+   gone; `resize: none` kills the browser's default drag handle, which the base stylesheet never
+   turns off and which renders as a visible grabber in the field's bottom-right corner.
+   `min-width: 0` and `margin: 0` are the belt-and-braces half: a flex item's default
+   `min-width: auto` is its intrinsic size (a textarea's is its `cols` attribute, which the base
+   never sets, so it falls back to the browser default of 20 characters), and any inherited
+   margin would show up as a gap inside the bar that looks exactly like the field being too
+   narrow. */
+textarea {
+  /* `flex: 1 1 0` (zero basis) is what makes the field fill the bar, so no `width` is needed -
+     and none may be set: see the box-sizing note below, under which `width: 100%` would mean
+     "100% of the bar *plus* my padding" and overflow it. */
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  resize: none;
+  font-size: 1vh;
+  line-height: 1.6vh;
+  /* The reported "field shrinks when you type" is an INITIAL-height bug, not a box-model one -
+     two earlier attempts (matching the base's `content-box`, then zeroing this padding) both
+     failed because they treated it as arithmetic. The base auto-grows the field on every
+     keystroke with
+       el.style.height = '5px';
+       el.style.height = el.scrollHeight - (paddingTop + paddingBottom) + 'px';
+     which always resolves to exactly one line of text. But *before* the first keystroke `resize()`
+     has never run, and a `<textarea>` with no CSS height falls back to its `rows` attribute -
+     which the base never sets, so the browser default of 2 applies. The field is therefore born
+     two lines tall and snaps to one on the first key. Nothing shrank; the untouched state was
+     simply wrong.
+     Fixing it means stating the post-resize height up front, so the two states agree:
+       - `height` = exactly one `line-height`, which is what `resize()` computes.
+       - `padding: 0` makes the subtraction above `- 0`, so `scrollHeight` is pure content height
+         and matches this `height` directly. The visual padding lives on the bar instead.
+       - `content-box` keeps `height` meaning content height, the same thing `resize()` assigns.
+     The three are one fix and only work together - do not change any of them in isolation.
+     See ADR-047. */
+  height: 1.6vh;
+  padding: 0;
+  box-sizing: content-box;
+  /* `resize()` measures `scrollHeight`, so the field must never show its own scrollbar while
+     being measured at the 5px probe height. */
+  overflow-y: hidden;
+  color: #f2f2f2;
+  background-color: transparent;
+}
+
+textarea::placeholder {
+  color: #6b6b6b;
+}
+
+.suggestions {
+  font-size: 1vh;
+  background-color: rgba(5, 5, 5, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.help,
+.disabled {
+  color: #6b6b6b;
+}

@@ -1,0 +1,85 @@
+.PhoneWrapper {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+.Phone {
+  position: absolute;
+  right: 0;
+  width: 500px;
+  height: 1000px;
+  background-size: cover;
+}
+
+.PhoneFrame {
+  position: absolute;
+  z-index: 999;
+  width: 500px;
+  height: 1000px;
+  pointer-events: none;
+}
+
+.PhoneScreen {
+  overflow: hidden;
+  position: absolute;
+  /* Server: was `black`. This sits behind every app, so any rounding gap between the app
+     container and the navigation bar showed up as a hard dark line. Painting it the same
+     neutral surface the apps and the nav bar use means a stray pixel is invisible instead of
+     being the most contrasting thing on screen. */
+  background-color: #f5f5f5;
+  bottom: 100px;
+  left: 50px;
+  right: 50px;
+  top: 100px;
+  display: flex;
+  flex-direction: column;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  border-radius: 20px;
+}
+
+/* The phone toggles `dark` on <html> (see Phone.tsx), so this backdrop follows the theme the
+   same way Tailwind's own `dark:` classes do. */
+.dark .PhoneScreen {
+  background-color: #171717;
+}
+
+/* Server: was `height: 90%` - a magic number that no longer matched what was actually left
+   after the notification bar (30px) and the navigation bar (56px). On an 800px screen it asked
+   for 720px where only 714px existed, and .PhoneScreen's black background showed through the
+   difference as a hard dark line above the nav bar, in every app. `flex: 1` fills exactly the
+   remaining space, whatever the other two bars end up being. */
+.PhoneAppContainer {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+* {
+  box-sizing: border-box;
+}
+*::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #666;
+}
+/* Server: `height` was unset, so only vertical scrollbars were the intended 3px - any
+   horizontal one fell back to the browser default (~15px) and ate a visible strip of the
+   screen. */
+*::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+  background-color: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: #f5f5f5;
+}
+
+.notistack-SnackbarContainer {
+  position: absolute !important;
+  top: 0 !important;
+}

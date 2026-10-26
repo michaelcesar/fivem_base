@@ -1,0 +1,14 @@
+{
+  "name": "live_jobs-tests",
+  "version": "1.0.0",
+  "description": "Unit tests for live_jobs's dependency-free pure functions, run against the real .lua source via fengari.",
+  "private": true,
+  "scripts": {
+    "test": "node jobs.test.js"
+  },
+  "license": "UNLICENSED",
+  "type": "commonjs",
+  "dependencies": {
+    "fengari": "^0.1.5"
+  }
+}

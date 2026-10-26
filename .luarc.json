@@ -1,0 +1,94 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+
+  "//": "Editor type checking. `undefined-field` and `need-check-nil` are the valuable ones here: they catch a config key that does not exist, which at runtime shows up only as a dead thread. FiveM native definitions come from dev/fivem-lls-addon (overextended/fivem-lls-addon, vendored - never edited, only replaced wholesale on update), so undefined-global stays off by default: it would otherwise flag every native as unknown, which drowned out everything else before this was added. `unknown-symbol`/`err-nonstandard-symbol` are disabled below because this is genuinely non-standard Lua - Cfx's fork adds `+=`-style compound assignment (used throughout this codebase) that the vanilla parser this tool ships doesn't understand, and its default quote-style opinion (double quotes) fights the project's own established single-quote convention. Neither is a real defect; both are noise from checking Cfx Lua with a parser that only knows standard Lua.",
+
+  "runtime.version": "Lua 5.4",
+  "runtime.pathStrict": true,
+
+  "workspace.checkThirdParty": false,
+  "workspace.library": [
+    "server-data/resources/[ox]/ox_lib/imports",
+    "server-data/resources/[ox]/ox_lib/resource",
+    "server-data/resources/[qbx]/qbx_core/modules",
+    "server-data/resources/[qbx]/qbx_core/shared",
+    "server-data/resources/[qbx]/qbx_core/types.lua",
+    "dev/fivem-lls-addon/library"
+  ],
+  "workspace.ignoreDir": [
+    ".git",
+    "dev/ox_lib-src/web/node_modules",
+    "fxserver",
+    "server-data/cache"
+  ],
+
+  "diagnostics.globals": [
+    "QBX",
+    "CourseConfig",
+    "lib",
+    "cache",
+    "exports",
+    "vec",
+    "vec2",
+    "vec3",
+    "vec4",
+    "quat",
+    "json",
+    "promise",
+    "Citizen",
+    "msgpack",
+    "SetInterval",
+    "ClearInterval",
+    "MySQL",
+    "fx_version",
+    "fx_version_str",
+    "game",
+    "games",
+    "name",
+    "description",
+    "author",
+    "version",
+    "repository",
+    "lua54",
+    "rdr3_warning",
+    "shared_script",
+    "shared_scripts",
+    "client_script",
+    "client_scripts",
+    "server_script",
+    "server_scripts",
+    "ui_page",
+    "files",
+    "dependency",
+    "dependencies",
+    "provide",
+    "this_is_a_map",
+    "server_only",
+    "loadscreen",
+    "loadscreen_manual_shutdown",
+    "convar_category"
+  ],
+
+  "diagnostics.disable": [
+    "lowercase-global",
+    "unknown-symbol",
+    "err-nonstandard-symbol"
+  ],
+
+  "diagnostics.neededFileStatus": {
+    "undefined-field": "Any",
+    "need-check-nil": "Any",
+    "param-type-mismatch": "Any",
+    "cast-local-type": "Any"
+  },
+
+  "hint.enable": true,
+  "hint.paramType": true,
+  "hint.setType": true,
+
+  "format.defaultConfig": {
+    "indent_style": "space",
+    "indent_size": "4",
+    "max_line_length": "100"
+  }
+}

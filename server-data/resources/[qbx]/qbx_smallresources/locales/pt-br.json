@@ -1,0 +1,42 @@
+{
+   "error": {
+      "canceled": "Cancelado.",
+      "cruise_control_disabled": "Piloto automático desativado.",
+      "cruise_control_unavailable": "Piloto automático indisponível.",
+      "deleted_recording": "Gravação apagada!",
+      "later_aligator": "Até mais, jacaré!",
+      "stress_gain": "Você está mais estressado!",
+      "no_vehicle_nearby": "Nenhum veículo por perto para desvirar.",
+      "is_handcuffed": "Você está algemado.",
+      "is_fastened": "Você está de cinto de segurança."
+   },
+   "success": {
+      "cruise_control_enabled": "Piloto automático ativado.",
+      "started_recording": "Gravação iniciada!",
+      "stopped_recording": "Gravação parada!",
+      "saved_recording": "Gravação salva!",
+      "stress_relief": "Você está mais relaxado!",
+      "flipped_car": "Veículo desvirado!"
+   },
+   "progress": {
+      "eating": "Comendo...",
+      "drinking": "Bebendo...",
+      "drinking_liquor": "Bebendo...",
+      "quick_sniff": "Cheirando...",
+      "smoking_crack": "Fumando crack...",
+      "popping_pills": "Tomando comprimidos...",
+      "healing": "Se curando...",
+      "smoking_meth": "Fumando metanfetamina...",
+      "lighting_joint": "Acendendo o baseado...",
+      "flipping_car": "Desvirando o veículo..."
+   },
+   "info": {
+      "minutes": "minutos",
+      "seconds": "segundos",
+      "shuffleSeat": "Trocar de assento"
+   },
+   "actions": {
+      "push_vehicle": "Segure [~g~SHIFT~w~] e [~g~E~w~] para empurrar o veículo. Solte [~g~SHIFT~w~] para parar.",
+      "toggle_cruise_control": "Alternar piloto automático"
+   }
+}

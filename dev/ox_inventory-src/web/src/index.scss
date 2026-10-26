@@ -1,0 +1,692 @@
+// Server: the palette and the type come from this project's own design system, whose tokens live
+// in `dev/ox_lib-src/web/src/theme/index.ts`. Only the four lines below changed - everything else in
+// this file already routes through them, which is why the whole UI moves with one edit.
+//
+//   $mainColor  #22232c -> #0f0f0f   panel; was a blue-tinted grey, ours is near-black
+//   $textColor  #c1c2c5 -> #f2f2f2   text;  same de-tinting
+//   $secondaryColorHighlight  #33343f -> #262626   hover
+//   $mainFont   Roboto -> Inter
+//
+// The SLOT backgrounds are deliberately untouched: `$secondaryColor`, `$secondaryColorLight` and
+// `$secondaryColorDark` are already near-black translucent and were reported as correct.
+//
+// Rajdhani rides along as `$displayFont` for headers - the same split the notifications and the HUD
+// use: Rajdhani for a title, Inter for anything read as a sentence. See ADR-156.
+$mainColor: #0f0f0f;
+$textColor: #f2f2f2;
+$mainFont: Inter;
+$displayFont: Rajdhani;
+
+$secondaryColor: rgba(12, 12, 12, 0.4);
+$secondaryColorHighlight: #262626;
+$secondaryColorLight: rgba(0, 0, 0, 0.5);
+$secondaryColorDark: rgba(12, 12, 12, 0.8);
+
+$gridCols: 5;
+$gridRows: 5;
+$gridSize: 10.2vh;
+$gridGap: 2px;
+$containerSize: calc(#{$gridRows} * #{$gridSize + 0.22vh} + #{$gridRows} * #{$gridGap});
+
+body {
+  margin: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+    'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  height: 100vh;
+  background: none !important;
+  overflow: hidden !important;
+  user-select: none;
+}
+
+#root {
+  height: 100%;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+p {
+  margin: 0;
+  padding: 0;
+  font-family: $mainFont;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.app-wrapper {
+  height: 100%;
+  width: 100%;
+  color: white;
+}
+
+.context-menu-list {
+  min-width: 200px;
+  background-color: $mainColor;
+  color: $textColor;
+  padding: 4px;
+  border-color: rgba(0, 0, 0, 0.2);
+  border-style: inset;
+  border-width: 1px;
+  border-radius: 4px;
+  outline: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.context-menu-item {
+  padding: 8px;
+  border-radius: 4px;
+  background-color: transparent;
+  outline: none;
+  border: none;
+  color: $textColor;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  &:active {
+    transform: none;
+  }
+  &:hover {
+    background-color: $secondaryColorHighlight;
+    cursor: pointer;
+  }
+}
+
+.tooltip-description {
+  padding-top: 5px;
+}
+
+.tooltip-markdown > p {
+  margin: 0;
+}
+
+button:active {
+  transform: translateY(3px);
+}
+
+.item-drag-preview {
+  width: 7.7vh;
+  height: 7.7vh;
+  z-index: 1;
+  position: fixed;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 7vh;
+  image-rendering: -webkit-optimize-contrast;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+body.inv-dragging {
+  cursor: grabbing;
+
+  // don't trigger the hover tooltip mid-drag; the slot itself stays a drop target
+  .item-slot-wrapper {
+    pointer-events: none;
+  }
+}
+
+.inventory-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+
+  gap: 20px;
+}
+
+.inventory-control {
+  display: flex;
+
+  .inventory-control-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .inventory-control-input {
+    transition: 200ms;
+    padding: 16px 8px;
+    border-radius: 2.5%;
+    font-family: $mainFont;
+    font-size: 16px;
+    text-align: center;
+    outline: none;
+    border: none;
+    color: #fff;
+    background-color: $secondaryColor;
+    &:focus-within {
+      background-color: $secondaryColorDark;
+    }
+  }
+
+  .inventory-control-button {
+    font-size: 14px;
+    color: #fff;
+    background-color: $secondaryColor;
+    transition: 200ms;
+    padding: 12px 8px;
+    border-radius: 2.5%;
+    border: none;
+    text-transform: uppercase;
+    font-family: $mainFont;
+    width: 100%;
+    font-weight: 500;
+    &:hover {
+      background-color: $secondaryColorDark;
+    }
+  }
+}
+
+.useful-controls-dialog {
+  background-color: $mainColor;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: $textColor;
+  width: 450px;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border-radius: 4px;
+  gap: 16px;
+}
+
+.useful-controls-dialog-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.useful-controls-dialog-title {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+}
+
+.useful-controls-dialog-close {
+  width: 25px;
+  height: 25px;
+  padding: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  fill: $textColor;
+  &:hover {
+    background-color: $secondaryColorHighlight;
+    cursor: pointer;
+  }
+}
+
+.useful-controls-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.useful-controls-button {
+  position: absolute !important;
+  bottom: 25px;
+  right: 25px;
+  transition: 200ms !important;
+  border: none;
+  color: white;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  fill: white;
+  border-radius: 5% !important;
+  background-color: $secondaryColor !important;
+  &:hover {
+    background-color: $secondaryColorDark !important;
+    cursor: pointer;
+  }
+}
+
+.useful-controls-exit-button {
+  position: absolute !important;
+  right: 8px;
+  top: 8px;
+  border-radius: 2.5% !important;
+  color: grey !important;
+}
+
+// Dialog is used fro useful controls window
+
+// inventory grids
+.inventory-grid-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: calc($gridGap * 2);
+}
+.inventory-grid-header-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  // Server: the inventory titles - 'Mochila', a stash name, a shop name - take the display face,
+  // uppercase and tracked out, exactly like a notification title. See ADR-156.
+  p {
+    font-family: $displayFont, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+}
+
+.inventory-grid-container {
+  display: grid;
+  height: $containerSize;
+  grid-template-columns: repeat($gridCols, $gridSize);
+  grid-auto-rows: $gridSize + 0.22vh;
+  gap: $gridGap;
+  overflow-y: scroll;
+}
+
+// inventory slots
+.inventory-slot {
+  background-color: $secondaryColor;
+  background-repeat: no-repeat;
+  background-position: center;
+  border-radius: 2.5%;
+  image-rendering: -webkit-optimize-contrast;
+  position: relative;
+  background-size: 7vh;
+  color: $textColor;
+  border-color: rgba(0, 0, 0, 0.2);
+  border-style: inset;
+  border-width: 1px;
+}
+
+.inventory-slot-label-box {
+  background-color: $mainColor;
+  color: $textColor;
+  text-align: center;
+  border-bottom-left-radius: 0.25vh;
+  border-bottom-right-radius: 0.25vh;
+  border-top-color: rgba(0, 0, 0, 0.2);
+  border-top-style: inset;
+  border-top-width: 1px;
+}
+
+.inventory-slot-label-text {
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 2px 3px;
+  font-weight: 400;
+  font-family: $mainFont;
+  font-size: 12px;
+}
+
+.inventory-slot-number {
+  background-color: white;
+  color: black;
+  height: 12px;
+  border-top-left-radius: 0.25vh;
+  border-bottom-right-radius: 0.25vh;
+  padding: 3px;
+  font-size: 12px;
+  font-family: $mainFont;
+}
+
+.item-slot-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  p {
+    font-size: 12px;
+  }
+}
+
+.item-slot-header-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.item-hotslot-header-wrapper {
+  @extend .item-slot-header-wrapper;
+  justify-content: space-between !important;
+}
+
+.item-slot-info-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-self: flex-end;
+  padding: 3px;
+  gap: 3px;
+  p {
+    font-size: 12px;
+  }
+}
+
+.item-slot-currency-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 3px;
+  p {
+    font-size: 14px;
+    text-shadow: 0.1vh 0.1vh 0 rgba(0, 0, 0, 0.7);
+  }
+}
+
+.item-slot-price-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  padding-right: 3px;
+  p {
+    font-size: 14px;
+    text-shadow: 0.1vh 0.1vh 0 rgba(0, 0, 0, 0.7);
+  }
+}
+
+.tooltip-wrapper {
+  pointer-events: none;
+  display: flex;
+  background-color: $mainColor;
+  width: 200px;
+  padding: 8px;
+  flex-direction: column;
+  min-width: 200px;
+  color: $textColor;
+  font-family: $mainFont;
+  border-radius: 4px;
+  border-color: rgba(0, 0, 0, 0.2);
+  border-style: inset;
+  border-width: 1px;
+  p {
+    font-size: 12px;
+    font-weight: 400;
+  }
+}
+
+.tooltip-header-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  // The item name in a tooltip is a title too, so it matches the grid header above.
+  p {
+    font-family: $displayFont, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+}
+
+.tooltip-crafting-duration {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  svg {
+    padding-right: 3px;
+  }
+  p {
+    font-size: 14px;
+  }
+}
+
+.tooltip-ingredients {
+  padding-top: 5px;
+}
+
+.tooltip-ingredient {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  img {
+    width: 28px;
+    height: 28px;
+    padding-right: 5px;
+  }
+}
+
+// hotbar
+.hotbar-container {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  justify-content: center;
+  width: 100%;
+  position: absolute;
+  bottom: 2vh;
+}
+
+.hotbar-item-slot {
+  @extend .inventory-slot;
+  width: $gridSize;
+  height: $gridSize;
+}
+
+.hotbar-slot-header-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+// item notifications
+
+.item-notification-container {
+  display: flex;
+  overflow-x: scroll;
+  flex-wrap: nowrap;
+  gap: 2px;
+  position: absolute;
+  bottom: 20vh;
+  left: 50%;
+  width: 100%;
+  margin-left: calc(50% - calc($gridSize/2));
+  transform: translate(-50%);
+}
+
+.item-notification-action-box {
+  width: 100%;
+  color: $textColor;
+  background-color: $secondaryColor;
+  text-transform: uppercase;
+  text-align: center;
+  border-top-left-radius: 0.25vh;
+  border-top-right-radius: 0.25vh;
+  font-family: $mainFont;
+  p {
+    font-size: 11px;
+    padding: 2px;
+    font-weight: 600;
+  }
+}
+
+.item-notification-item-box {
+  @extend .inventory-slot;
+  height: $gridSize;
+  width: $gridSize;
+}
+
+.durability-bar {
+  background: rgba(0, 0, 0, 0.5);
+  height: 3px;
+  overflow: hidden;
+}
+
+.weight-bar {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px inset rgba(0, 0, 0, 0.1);
+  height: 0.8vh;
+  border-radius: 5%;
+  overflow: hidden;
+}
+
+.transition-fade-enter {
+  opacity: 0;
+}
+
+.transition-fade-enter-active {
+  opacity: 1;
+  transition: opacity 200ms;
+}
+
+.transition-fade-exit {
+  opacity: 1;
+}
+
+.transition-fade-exit-active {
+  opacity: 0;
+  transition: opacity 200ms;
+}
+
+.transition-slide-up-enter {
+  transform: translateY(200px);
+}
+
+.transition-slide-up-enter-active {
+  transform: translateY(0px);
+  transition: all 200ms;
+}
+
+.transition-slide-up-exit {
+  transform: translateY(0px);
+}
+
+.transition-slide-up-exit-active {
+  transform: translateY(200px);
+  transition: all 200ms;
+}
+
+// Server: the amount dialog a shift-drag opens (AmountPrompt.tsx, ADR-105).
+//
+// Built from the same pieces the removed `.inventory-control` used - $secondaryColor inputs and
+// buttons - inside the card `.useful-controls-dialog` already defines, so it reads as a part of
+// this screen rather than as something bolted on.
+.amount-prompt-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+}
+
+// Server: the card is an inventory slot, scaled up - same $secondaryColor fill, same inset border
+// and same 2.5% radius as `.inventory-slot`, rather than the $mainColor of the help dialog. The
+// dialog belongs to the grid it was opened from, so it is built out of the grid's own material.
+.amount-prompt-dialog {
+  background-color: $secondaryColor;
+  border-color: rgba(0, 0, 0, 0.2);
+  border-style: inset;
+  border-width: 1px;
+  border-radius: 2.5%;
+  color: $textColor;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 16px;
+}
+
+.amount-prompt-title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+
+  p {
+    font-size: 18px;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: $textColor;
+  }
+}
+
+.amount-prompt-item {
+  font-size: 14px;
+}
+
+// Every control in the card carries the same inset border the slots do - that border is what
+// separates them from the card, since they share its fill. The input keeps a darker fill on top of
+// it: it is the one thing here you type into, and a field that looks exactly like a button reads
+// as a button.
+// The fill does not change on focus. The dialog opens with this field already selected, so a focus
+// highlight fires the instant it appears and reads as a flicker rather than as feedback. No
+// transition either - with nothing changing, it had nothing to animate.
+.amount-prompt-input {
+  padding: 16px 8px;
+  border-radius: 2.5%;
+  border-color: rgba(0, 0, 0, 0.2);
+  border-style: inset;
+  border-width: 1px;
+  font-family: $mainFont;
+  font-size: 16px;
+  text-align: center;
+  outline: none;
+  color: #fff;
+  background-color: $secondaryColorDark;
+}
+
+.amount-prompt-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+// The buttons take the card's own fill and are told apart by the border alone, which is the same
+// way a slot is told apart from the grid behind it. Hover is the only thing that changes the fill.
+.amount-prompt-button {
+  font-size: 14px;
+  color: #fff;
+  background-color: $secondaryColor;
+  transition: 200ms;
+  padding: 12px 8px;
+  border-radius: 2.5%;
+  border-color: rgba(0, 0, 0, 0.2);
+  border-style: inset;
+  border-width: 1px;
+  text-transform: uppercase;
+  font-family: $mainFont;
+  width: 100%;
+  font-weight: 500;
+  cursor: pointer;
+  &:hover {
+    background-color: $secondaryColorDark;
+  }
+}

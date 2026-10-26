@@ -1,0 +1,120 @@
+## You CAN edit the following:
+set onesync on
+endpoint_add_tcp "0.0.0.0:30120"
+endpoint_add_udp "0.0.0.0:30120"
+sv_maxclients 48
+set steam_webApiKey "none"
+sets tags "roleplay, qbox, lite"
+
+## You MAY edit the following:
+sv_licenseKey "changeme" # generate at https://portal.cfx.re
+sv_hostname "^2Lite ^7RP | ^3qbx_core^7"
+sets sv_projectName "Server"
+sets sv_projectDesc "Servidor de GTA RP ambientado em uma ilha tropical"
+sets locale "pt-BR"
+# TODO: add a custom myLogo.png (256x256 recommended) in this folder, then uncomment the line below
+# load_server_icon myLogo.png
+set sv_enforceGameBuild 3258
+set mysql_connection_string "mysql://user:password@localhost:3306/server"
+
+# Chat config
+set resources_useSystemChat true
+set qbx_chat:joinMessage "^2%s entrou no servidor"
+set qbx_chat:quitMessage "^1%s saiu do servidor (%s)"
+
+# Voice config
+exec voice.cfg
+
+# Qbox config
+setr qb_locale "pt-BR"
+# ox_lib's locale (ox:locale) is set in ox.cfg, which is exec'd further down and would override anything set here.
+setr qbx:enableBridge "true" # When true, enables the qb-core bridge for qbx_core
+set qbx:enableQueue "true" # When true, enables qbx_core's built-in queue system
+set qbx:bucketLockdownMode "inactive" # Sets the lockdown mode as inactive read here: https://docs.fivem.net/natives/?_0xA0F2201F
+set qbx:discordLink "" # TODO: put the Lite Discord invite link here
+set qbx:max_jobs_per_player 1 # Sets the number of jobs per player
+set qbx:max_gangs_per_player 1 # Sets the number of gangs per player
+set qbx:setjob_replaces "true" # When true, the SetJob function deletes the previous primary job of the player before setting the new one
+set qbx:setgang_replaces "true" # When true, the SetGang function deletes the previous primary gang of the player before setting the new one
+set qbx:cleanPlayerGroups "true" # When true, on server startup, the database will be checked for any groups/grades players have that are not in config files and removes them from the database if so
+set qbx:allowMethodOverrides "true" # When true, enables the ability of resources to override existing methods in the player object
+set qbx:disableOverrideWarning "false" # When true, disables warnings from resources overriding existing methods in the player object
+setr qbx:enableVehiclePersistence "false" # When true, player vehicles marked for persistence will be respawned when deleted
+setr qbx:vehiclePersistenceType "semi" # When "full", player vehicles will also be respawned after server restarts, when "semi", they will only respawn when deleted
+set qbx:acknowledge "false" # When true, disables the default service message
+setr qbx:enableGroupManagement "false" # When true, allows bosses to manage job/gang grades. Specifically the grade name.
+
+# Message displayed to players in the chat after loading in
+setr qbx:motd "<p style='padding: 1rem; background-color: #141517; border: 1px solid #373a40; border-radius: 0.5rem; text-align: center;'><span style='color: rgb(200, 200, 40);'>Bem-vindo ao Server!</span></p>"
+
+# illenium-appearance locale config
+setr illenium-appearance:locale "en"
+
+# Renewed-Weathersync config
+setr weather_disablecd true
+
+# Ox resources config
+exec ox.cfg
+
+# NPWD config
+set npwd:framework "qbx"
+# fill them in if you want extra phone functionality https://projecterror.dev/docs/npwd/start/installation#setting-up-camera-functionality
+set SCREENSHOT_BASIC_TOKEN ""
+set NPWD_AUDIO_TOKEN ""
+
+# loadscreen config
+setr loadscreen:externalShutdown true
+set loadscreen:primaryColor "#f1e542"
+set loadscreen:shadowColor "#1a18077f"
+
+# These resources will start by default.
+ensure mapmanager
+ensure chat
+ensure spawnmanager
+ensure sessionmanager
+stop basic-gamemode
+ensure hardcap
+ensure baseevents
+
+# Qbox & Extra stuff
+ensure ox_lib
+ensure qbx_core
+ensure ox_target
+ensure [ox]
+ensure [qbx]
+ensure [standalone]
+ensure [voice]
+
+ensure [npwd-apps]
+ensure qbx_npwd
+ensure npwd
+
+## Permissions ##
+# TODO: replace with your own Cfx.re/Steam identifier once you have one, e.g.:
+# add_principal identifier.steam:1100001XXXXXXXX group.admin
+add_principal identifier.fivem:1 group.admin
+
+# Server: dev tooling switch - CLAUDE.md hard rule 6. `lite_tools` registers nothing at all
+# unless this is "1": no /tp, /placecar, /spawndrugs, nothing. It is commented out here on
+# purpose, so a server built from this example ships WITHOUT dev tooling by default and has to
+# opt in deliberately. Uncomment only on a development machine.
+# setr lite_tools:enabled "1"
+
+# Server: development override for lite_robbery. Any value >= 0 replaces the real count of
+# on-duty police, so a store robbery can be tested without two officers logged in. It cannot be
+# faked with NPCs - the check reads connected players, and a ped is not one.
+#
+# It prints a loud warning at every boot while set. Remove it before players join.
+# set lite_robbery:policeOverride 2
+
+# The three lite_tools commands that touch server state are ACE-restricted on top of the switch
+# above, so they stay admin-only even while the switch is on. /spawndrugs is the one that
+# actually matters - it mints items straight into an inventory.
+add_ace group.admin command.spawndrugs allow
+add_ace group.admin command.resetcourses allow
+add_ace group.admin command.myid allow
+
+exec permissions.cfg
+
+## Miscellaneous ##
+exec misc.cfg

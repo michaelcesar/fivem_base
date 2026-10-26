@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Documento</title>
+<style>
+  /* Servidor: this one screen deliberately does NOT follow the project's monochrome GFX layout.
+     Everything else on this server is a dark HUD panel; a document should read as paper -
+     an object the character is holding, not a menu the player is operating. Requested that way.
+     See ADR-132. */
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.55);
+  }
+
+  body.visible { display: flex; }
+
+  .card {
+    width: 620px;
+    background: #f4f1e8;                       /* aged paper, not white */
+    color: #1c1a15;
+    border-radius: 4px;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, .65);
+    overflow: hidden;
+    position: relative;
+    /* Guilloche-ish security tint: two faint diagonal washes, the way a real ID has a
+       patterned background rather than a flat fill. */
+    background-image:
+      repeating-linear-gradient(45deg,  rgba(120,100,60,.045) 0 2px, transparent 2px 7px),
+      repeating-linear-gradient(-45deg, rgba(120,100,60,.045) 0 2px, transparent 2px 7px);
+  }
+
+  .header {
+    background: linear-gradient(100deg, #14304f, #1e4a78);
+    color: #f4f1e8;
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid #b99a4a;          /* the gold rule most official IDs carry */
+  }
+
+  .header h1 { font-size: 17px; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; }
+  .header .sub { font-size: 10px; letter-spacing: .22em; opacity: .72; text-transform: uppercase; }
+
+  .body { display: flex; gap: 22px; padding: 22px; }
+
+  /* Photo frame. No portrait is captured anywhere on this server, so this is a placeholder
+     silhouette rather than a broken image - stated plainly instead of pretending. */
+  .photo {
+    width: 132px; height: 168px; flex: none;
+    background: #dcd7c7;
+    border: 1px solid #a8a08a;
+    display: flex; align-items: flex-end; justify-content: center;
+    overflow: hidden;
+  }
+  .photo svg { width: 108px; height: 132px; opacity: .35; }
+
+  .fields { flex: 1; }
+
+  .row { display: flex; padding: 5px 0; border-bottom: 1px dotted #c3bca6; }
+  .row:last-child { border-bottom: none; }
+  .label {
+    width: 132px; flex: none;
+    font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase;
+    color: #6d6552; padding-top: 3px;
+  }
+  .value { font-size: 14px; font-weight: 600; color: #1c1a15; }
+  .value.mono { font-family: 'Consolas', monospace; letter-spacing: .06em; }
+
+  .section-title {
+    padding: 12px 22px 4px;
+    font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+    color: #14304f; font-weight: 700;
+    border-top: 1px solid #d8d2be;
+  }
+
+  .licences { padding: 4px 22px 18px; display: flex; flex-wrap: wrap; gap: 7px; }
+  .lic {
+    font-size: 11px; padding: 4px 11px; border-radius: 2px;
+    background: #e7e2d0; border: 1px solid #b9b099; color: #3d3728;
+    letter-spacing: .04em;
+  }
+  .lic.none { background: transparent; border-style: dashed; color: #857c66; font-style: italic; }
+
+  .footer {
+    background: #e9e4d2;
+    border-top: 1px solid #cfc8b2;
+    padding: 9px 22px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: #6d6552;
+  }
+  .hint b { color: #14304f; }
+
+  /* Machine-readable strip, the band along the bottom of a passport. Pure decoration and
+     intentionally unreadable at this size - it exists to make the card read as a document. */
+  .mrz {
+    font-family: 'Consolas', monospace;
+    /* Two 44-character lines have to fit a 620px card without wrapping, so this is sized down
+       and the tracking tightened from the single-line version. `pre` keeps the newline. */
+    font-size: 10px; letter-spacing: .06em; line-height: 1.5;
+    background: #f4f1e8; color: #2a2620;
+    padding: 8px 22px 10px;
+    border-top: 1px dashed #c3bca6;
+    white-space: pre; overflow: hidden;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div>
+        <h1>Carteira de Identidade</h1>
+        <div class="sub">Estado de San Andreas</div>
+      </div>
+      <div class="sub" id="issuer">Registro Civil</div>
+    </div>
+
+    <div class="body">
+      <div class="photo">
+        <svg viewBox="0 0 100 122" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="38" r="23" fill="#6d6552"/>
+          <path d="M5 122c0-27 20-44 45-44s45 17 45 44z" fill="#6d6552"/>
+        </svg>
+      </div>
+
+      <div class="fields" id="fields"></div>
+    </div>
+
+    <div class="section-title">Ocupação</div>
+    <div class="fields" id="job" style="padding: 0 22px 8px;"></div>
+
+    <div class="section-title">Licenças</div>
+    <div class="licences" id="licences"></div>
+
+    <div class="mrz" id="mrz"></div>
+
+    <div class="footer">
+      <span class="hint">Pressione <b>ESC</b> para fechar</span>
+      <span id="cid"></span>
+    </div>
+  </div>
+
+<script>
+  const el = (id) => document.getElementById(id);
+
+  function rows(target, pairs) {
+    el(target).innerHTML = pairs.map(([label, value, mono]) =>
+      `<div class="row"><div class="label">${label}</div>` +
+      `<div class="value${mono ? ' mono' : ''}">${value}</div></div>`
+    ).join('');
+  }
+
+  function render(d) {
+    rows('fields', [
+      ['Nome', `${d.firstname} ${d.lastname}`],
+      ['Nascimento', d.birthdate, true],
+      ['Sexo', d.gender],
+      ['Nacionalidade', d.nationality],
+      ['Telefone', d.phone, true],
+    ]);
+
+    const job = [
+      ['Emprego', d.job],
+      ['Cargo', d.grade],
+      ['Situação', d.duty],
+    ];
+    if (d.gang) {
+      job.push(['Organização', d.gang]);
+      job.push(['Patente', d.gangGrade]);
+    }
+    rows('job', job);
+
+    el('licences').innerHTML = d.licences.length
+      ? d.licences.map(l => `<span class="lic">${l}</span>`).join('')
+      : '<span class="lic none">Nenhuma licença emitida</span>';
+
+    el('cid').textContent = d.citizenid;
+
+    // Passport-style strip (ICAO TD3 shape: two lines of 44). Decorative - nothing reads it -
+    // but built from the data actually on the card, because a single line of mostly filler reads
+    // as a rendering bug rather than as a document. Line 1 is the name, line 2 the document
+    // number, nationality, date of birth and sex, which is what fills a real one out.
+    const strip = (s) => String(s).toUpperCase().replace(/[^A-Z0-9]/g, '<');
+    const digits = (s) => String(s).replace(/\D/g, '');
+
+    // birthdate arrives as DD-MM-YYYY; an MRZ carries YYMMDD.
+    const b = digits(d.birthdate);
+    const dob = b.length >= 8 ? b.slice(6, 8) + b.slice(2, 4) + b.slice(0, 2) : '<<<<<<';
+    const sex = d.gender === 'Feminino' ? 'F' : d.gender === 'Masculino' ? 'M' : '<';
+    const docNo = strip(d.citizenid).slice(0, 9).padEnd(9, '<');
+
+    const line1 = `ID<SAN${strip(d.lastname)}<<${strip(d.firstname)}`.padEnd(44, '<').slice(0, 44);
+    const line2 = `${docNo}<SAN${dob}<${sex}<<<<<<<<<<<<<<<${strip(d.citizenid)}`
+      .padEnd(44, '<').slice(0, 44);
+
+    el('mrz').textContent = `${line1}\n${line2}`;
+  }
+
+  window.addEventListener('message', (e) => {
+    const data = e.data;
+    if (data.action === 'open') {
+      render(data.payload);
+      document.body.classList.add('visible');
+    } else if (data.action === 'close') {
+      document.body.classList.remove('visible');
+    }
+  });
+
+  document.addEventListener('keyup', (e) => {
+    if (e.key === 'Escape') {
+      document.body.classList.remove('visible');
+      fetch(`https://${GetParentResourceName()}/close`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}',
+      });
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+/*
+  Servidor: the "procurado" countdown badge.
+
+  Same `gfx` theme tokens `dev/ox_lib-src/web/src/theme/index.ts` defines for the rest of this
+  project's HUD (panel/border/corner-bracket/font treatment) - copied as literal values rather than
+  imported, since this page has no build step (same plain HTML/CSS/JS shape as `srv_trade`'s own
+  web/, not a bundled React app - this badge is far too small to justify one). Recolored red
+  (`gfx.red`) rather than the theme's neutral silver, since this is the one HUD element in the
+  project that represents a danger state rather than an action in progress.
+*/
+
+@font-face {
+  font-family: 'Rajdhani';
+  font-weight: 700;
+  src: url('nui://ox_lib/web/build/fonts/Rajdhani-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-weight: 100 900;
+  src: url('nui://ox_lib/web/build/fonts/Inter-Variable.ttf') format('truetype');
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: none;
+}
+
+.wanted-badge {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+
+  min-width: 128px;
+  padding: 10px 18px 12px;
+
+  background: #0f0f0f;
+  border: 1px solid rgba(224, 85, 74, 0.4);
+  border-radius: 3px;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.4), 0 0 18px rgba(224, 85, 74, 0.25);
+
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 180ms ease, transform 180ms ease;
+
+  animation: wanted-pulse 1.6s ease-in-out infinite;
+}
+
+.wanted-badge.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Same 14x14 top-left HUD corner bracket every panel in this project uses, in the danger red
+   instead of the neutral white it takes everywhere else. */
+.wanted-badge::before {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid rgba(224, 85, 74, 0.7);
+  border-left: 2px solid rgba(224, 85, 74, 0.7);
+  pointer-events: none;
+}
+
+.wanted-label {
+  margin: 0;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #e0554a;
+}
+
+.wanted-time {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  color: #f2f2f2;
+}
+
+@keyframes wanted-pulse {
+  0%, 100% {
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.4), 0 0 18px rgba(224, 85, 74, 0.25);
+  }
+  50% {
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.4), 0 0 28px rgba(224, 85, 74, 0.5);
+  }
+}
+
+.hidden {
+  display: none;
+}

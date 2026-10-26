@@ -1,0 +1,29 @@
+# Normalise line endings so the repository stores LF regardless of the machine that wrote
+# the file. Without this, every commit from Windows carries CRLF churn and git warns on
+# every single staged file, which trains everyone to ignore its warnings.
+* text=auto eol=lf
+
+# Binary assets git must never touch.
+*.ttf   binary
+*.otf   binary
+*.woff  binary
+*.woff2 binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.ytd   binary
+*.ydr   binary
+*.yft   binary
+*.ymap  binary
+*.ytyp  binary
+*.gfx   binary
+*.dll   binary
+*.exe   binary
+
+# Shell scripts must keep LF or they fail to run.
+*.sh text eol=lf
+
+# Generated NUI output - collapse it in diffs, it is never reviewed by hand.
+server-data/resources/[ox]/ox_lib/web/build/** linguist-generated=true -diff

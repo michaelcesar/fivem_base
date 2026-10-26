@@ -1,0 +1,456 @@
+<html>
+    <head>
+        <meta id="viewport" name="viewport" content ="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" type="text/css" href="styles.css"/>
+        <link rel="stylesheet" type="text/css" href="responsive.css"/>
+        <link href="https://cdn.jsdelivr.net/npm/quasar@2.1.0/dist/quasar.prod.css" rel="stylesheet" type="text/css"/>
+        <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet" type="text/css"/>
+        <!--
+            Servidor: Rajdhani is this project's display face - the ox_lib fork uses it for the
+            context menu, the radial and the progress circle. Loading it here is what makes the HUD
+            read as the same product as every menu, instead of GTA's own Pricedown.
+        -->
+        <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" type="text/css"/>
+        <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.13.0/css/all.css"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/quasar@2.1.0/dist/quasar.umd.prod.js" defer></script>
+        <script src="app.js" defer></script>
+    </head>
+    <body>
+        <div id="baseplate-container" v-show="show">
+            <div v-if="showStreets" class="street-container">
+                <div class="street2">{{street2}}</div>
+                <div class="street1">{{street1}}</div>
+            </div>
+            <div class="baseplate" v-show="show">
+                <div v-if="showPointer" class="pointer">˅</div>
+                <div v-if="showDegrees" class="degrees"></div>
+                    <svg class="bezel">
+                        <rect width="3" stroke="white" fill="white" stroke-width="0.5" stroke-opacity="0.2" fill-opacity="0.15" v-if="showCompass" height="20" x="-90"/>
+                        <rect width="3" stroke="white" fill="white" stroke-width="0.5" stroke-opacity="0.2" fill-opacity="0.15" v-if="showCompass" height="9" x="-45"/>
+                        <rect width="4.5" stroke="white" fill="white" stroke-width="0.5" stroke-opacity="0.2" fill-opacity="0.15" v-if="showCompass" height="20" x="0"/>
+                        <rect width="3" stroke="white" fill="white" stroke-width="0.5" stroke-opacity="0.2" fill-opacity="0.15" v-if="showCompass" height="9" x="45"/>
+                        <rect width="4.5" stroke="white" fill="white" stroke-width="0.5" stroke-opacity="0.2" fill-opacity="0.15" v-if="showCompass" height="20" x="90"/>
+                        <rect width="3" stroke="white" fill="white" stroke-width="0.5" stroke-opacity="0.2" fill-opacity="0.15" v-if="showCompass" height="9" x="135"/>
+                        <rect width="4.5" stroke="white" fill="white" stroke-width="0.5" stroke-opacity="0.2" fill-opacity="0.15" v-if="showCompass" height="20" x="180"/>
+                        <rect width="3" stroke="white" fill="white" stroke-width="0.5" stroke-opacity="0.2" fill-opacity="0.15" v-if="showCompass" height="9" x="225"/>
+                        <rect width="4.5" stroke="white" fill="white" stroke-width="0.5" stroke-opacity="0.2" fill-opacity="0.15" v-if="showCompass" height="20" x="270"/>
+                        <rect width="3" stroke="white" fill="white" stroke-width="0.5" stroke-opacity="0.2" fill-opacity="0.15" v-if="showCompass" height="9" x="315"/>
+                        <rect width="4.5" stroke="white" fill="white" stroke-width="0.5" stroke-opacity="0.2" fill-opacity="0.15" v-if="showCompass" height="20" x="360"/>
+                        <rect width="3" stroke="white" fill="white" stroke-width="0.5" stroke-opacity="0.2" fill-opacity="0.15" v-if="showCompass" height="9" x="405"/>
+                        <rect width="3" stroke="white" fill="white" stroke-width="0.5" stroke-opacity="0.2" fill-opacity="0.15" v-if="showCompass" height="20" x="450"/>
+                    </svg>
+            
+                    <svg class="bearing">
+                        <text v-if="showCompass" x="0" y="1.5" dominant-baseline="middle" text-anchor="middle" fill= "yellow">N</text>
+                        <text v-if="showCompass" x="360" y="1.5" dominant-baseline="middle" text-anchor="middle" fill= "yellow">N</text>
+                        <text style="font-size: 1.4vh!important; font-weight: 400!important;" v-if="showCompass" x="315" y="-11" dominant-baseline="middle" text-anchor="middle" fill="white">NW</text>
+                        <text style="font-size: 1.4vh!important; font-weight: 400!important;" v-if="showCompass" x="-45" y="-11" dominant-baseline="middle" text-anchor="middle" fill="white">NW</text>
+                        <text style="font-size: 1.4vh!important; font-weight: 400!important;" v-if="showCompass" x="45" y="-11" dominant-baseline="middle" text-anchor="middle" fill="white">NE</text>
+                        <text style="font-size: 1.4vh!important; font-weight: 400!important;" v-if="showCompass" x="405" y="-11" dominant-baseline="middle" text-anchor="middle" fill="white">NE</text>
+                        <text v-if="showCompass" x="90" y="1.5" dominant-baseline="middle" text-anchor="middle" fill="white">E</text>
+                        <text style="font-size: 1.4vh!important; font-weight: 400!important;" v-if="showCompass" x="135" y="-11" dominant-baseline="middle" text-anchor="middle" fill="white">SE</text>
+                        <text v-if="showCompass" x="180" y="1.5" dominant-baseline="middle" text-anchor="middle" fill="white">S</text>
+                        <text style="font-size: 1.4vh!important; font-weight: 400!important;" v-if="showCompass" x="225" y="-11" dominant-baseline="middle" text-anchor="middle" fill="white">SW</text>
+                        <text v-if="showCompass" x="270" y="1.5" dominant-baseline="middle" text-anchor="middle" fill="white">W</text>
+                    </svg>
+                </div>
+            </div>
+        <div id="openmenu">
+            <div id="menu">
+                <q-splitter v-model="splitterModel" style="height: 50vh;">
+                    <template v-slot:before>
+                        <q-tabs v-model="tab" active-bg-color="active-tab" inline-label indicator-color="transparent" vertical class="text-tabcolor bg-panel">
+                            <q-tab name="hud" icon="view_list" label="HUD" style="height: 5.5vh; padding-left: 1vh; justify-content: end;"></q-tab>
+                        </q-tabs>
+                    </template>
+                    <template v-slot:after>
+                        <q-tab-panels v-model="tab" animated swipeable vertical transition-prev="jump-up" transition-next="jump-up" class="bg-active-tab">
+                            <q-tab-panel name="hud">
+                                <div class="q-mb-md">
+                                    <div class="text-h6 q-mb-md">Reset Hud <img class="brand-logo" align="right" src="./brand-logo.svg"></img></div>
+                                    <div class="q-pa-md q-gutter-sm">
+                                        <q-btn v-on:click="resetStorage($event)" :loading="progress[0].loading" :percentage="progress[0].percentage" text-color="textbutton" color="bgbutton" @click="startComputing(0)" style="width: 150px"> Reset Settings
+                                        <template v-slot:loading> <q-spinner-gears class="on-left"></q-spinner-gears> Resetting... </template></q-btn>
+                                        <div class="text-h7 q-mb-md">If you want to reset your settings back to default; click this shiny button! <br> (you will have to relog for your menu to reset changes successfully)</div>
+                                        <q-btn v-on:click="restartHud($event)" :loading="progress[1].loading" :percentage="progress[1].percentage" text-color="textbutton" color="bgbutton" @click="startComputing(1)" style="width: 150px"> Reset Hud
+                                        <template v-slot:loading> <q-spinner-gears class="on-left"></q-spinner-gears> Resetting... </template></q-btn>
+                                        <div class="text-h7 q-mb-md">If your hud is acting up, give it a good ol' reset! Or you can do /resethud</div>
+                                    </div>
+                                    <hr>
+                                    <div class="text-h6 q-mb-md">Options</div>
+                                    <div class="text-h7">
+                                        <q-item borderless tag="label" v-ripple>
+                                            <q-item-section avatar>
+                                                <q-checkbox v-model="isOutMapChecked" v-on:click="showOutMap($event)" color="checkbox" val="1"></q-checkbox>
+                                            </q-item-section>
+                                            <q-item-section>
+                                                <q-item-label>Show Minimap Only in Vehicle</q-item-label>
+                                                <q-item-label class="text-h7" caption>Disabling this will always keep your minimap on your screen</q-item-label>
+                                            </q-item-section>
+                                        </q-item>
+                                        <q-item borderless tag="label" v-ripple>
+                                            <q-item-section avatar>
+                                                <q-checkbox v-model="isOutCompassChecked" v-on:click="showOutCompass($event)" color="checkbox" val="2"></q-checkbox>
+                                            </q-item-section>
+                                            <q-item-section>
+                                                <q-item-label>Show Compass Only in Vehicle</q-item-label>
+                                                <q-item-label class="text-h7" caption>Disabling this will always keep your compass on your screen</q-item-label>
+                                            </q-item-section>
+                                        </q-item>
+                                        <q-item borderless tag="label" v-ripple>
+                                            <q-item-section avatar>
+                                                <q-checkbox v-model="isCompassFollowChecked" v-on:click="showFollowCompass($event)" color="checkbox" val="3"></q-checkbox>
+                                            </q-item-section>
+                                            <q-item-section>
+                                                <q-item-label>Show Compass Follow Cam</q-item-label>
+                                                <q-item-label class="text-h7" caption>Disabling this will make it so you can no longer use your mouse to rotate the compass around</q-item-label>
+                                            </q-item-section>
+                                        </q-item>
+                                    </div>
+                                    <hr>
+                                    <div class="text-h6 q-mb-md">Notifications</div>
+                                    <div class="text-h7">
+                                        <q-checkbox v-on:click="showMapNotif($event)" label='Map Notifications Enabled' v-model="isMapNotifChecked" color="checkbox" val="7" style="display: flex;"></q-checkbox>
+                                        <q-checkbox v-on:click="showFuelAlert($event)" label='Low Fuel Alert Enabled' v-model="isLowFuelChecked" color="checkbox" val="8" style="display: flex;"></q-checkbox>
+                                        <q-checkbox v-on:click="showCinematicNotif($event)" label='Cinematic Mode Notifications Enabled' v-model="isCinematicNotifChecked" color="checkbox" val="9" style="display: flex;"></q-checkbox>
+                                    </div>
+                                </div>                        
+                                <hr>
+                                <div class="text-h6 q-mb-md">Status</div>
+                                <div class="text-h7">
+                                    <q-checkbox v-on:click="dynamicHealth($event)" label='Show Health always' v-model="isDynamicHealthChecked" color="checkbox" val="10" style="display: flex;"></q-checkbox>
+                                    <q-checkbox v-on:click="dynamicArmor($event)" label='Show Armor always' v-model="isDynamicArmorChecked" color="checkbox" val="11" style="display: flex;"></q-checkbox>
+                                    <q-checkbox v-on:click="dynamicHunger($event)" label='Show Hunger always' v-model="isDynamicHungerChecked" color="checkbox" val="12" style="display: flex;"></q-checkbox>
+                                    <q-checkbox v-on:click="dynamicThirst($event)" label='Show Thirst always' v-model="isDynamicThirstChecked" color="checkbox" val="13" style="display: flex;"></q-checkbox>
+                                    <q-checkbox v-on:click="dynamicStress($event)" label='Show Stress always' v-model="isDynamicStressChecked" color="checkbox" val="14" style="display: flex;"></q-checkbox>
+                                    <q-checkbox v-on:click="dynamicOxygen($event)" label='Show Oxygen always' v-model="isDynamicOxygenChecked" color="checkbox" val="15" style="display: flex;"></q-checkbox>
+                                </div>
+                                <hr>
+                                <div class="text-h6 q-mb-md">Vehicle</div>
+                                <div class="text-h7">
+                                    <q-toggle v-on:click="changeFPS($event)" size="lg" keep-color icon-color="toggleicons" color="checkbox" :label="`Speedometer FPS ${isChangeFPSChecked}`" unchecked-icon="60fps" false-value="Synced" true-value="Optimized" checked-icon="30fps" v-model="isChangeFPSChecked"></q-toggle>
+                                    <div class="text-h7 q-mb-md-d">Synced FPS option will result in less optimization, but keep your speedometer in real time, however, it will also be more demanding on your machine.</div>
+                                    <q-toggle v-on:click="ToggleMapShape($event)" size="lg" keep-color icon-color="toggleicons" color="checkbox" :label="`Minimap ${isToggleMapShapeChecked}`" unchecked-icon="radio_button_unchecked" false-value="circle" true-value="square" checked-icon="check_box_outline_blank" v-model="isToggleMapShapeChecked"></q-toggle>
+                                    <div class="text-h7 q-mb-md-d">Whether it's square or circle you desire, you have the ability to choose!</div>
+                                    <q-checkbox v-on:click="HideMap($event)" label='Minimap Enabled' v-model="isHideMapChecked" color="checkbox" val="15" style="display: flex;"></q-checkbox>
+                                    <q-checkbox v-on:click="ToggleMapBorders($event)" label='Minimap Borders Enabled' v-model="isToggleMapBordersChecked" color="checkbox" val="16" style="display: flex;"></q-checkbox>
+                                    <q-checkbox v-on:click="dynamicEngine($event)" label='Show Engine always' v-model="isDynamicEngineChecked" color="checkbox" val="17" style="display: flex;"></q-checkbox>
+                                    <q-checkbox v-on:click="dynamicNitro($event)" label='Show Nitro always' v-model="isDynamicNitroChecked" color="checkbox" val="18" style="display: flex;"></q-checkbox>
+                                </div>
+                                <hr>
+                                <div class="text-h6 q-mb-md">Compass</div>
+                                <div class="text-h7">
+                                    <q-toggle v-on:click="changeCompassFPS($event)" size="lg" keep-color icon-color="toggleicons" color="checkbox" :label="`Compass FPS ${isChangeCompassFPSChecked}`" unchecked-icon="60fps" false-value="Synced" true-value="Optimized" checked-icon="30fps" v-model="isChangeCompassFPSChecked"></q-toggle>
+                                    <div class="text-h7 q-mb-md-d">Synced FPS option will result in less optimization, but keep your compass in real time, however, it will also be more demanding on your machine.</div>
+                                    <q-item borderless tag="label" v-ripple>
+                                        <q-item-section avatar>
+                                            <q-checkbox v-on:click="showCompassBase($event)" v-model="isShowCompassChecked" color="checkbox" val="19"></q-checkbox>
+                                        </q-item-section>
+                                        <q-item-section >
+                                            <q-item-label>Compass Enabled</q-item-label>
+                                            <q-item-label class="text-h7" caption>Disabling this will make it so you can't see the compass navigation</q-item-label>
+                                        </q-item-section>
+                                    </q-item>
+                                    <q-item borderless tag="label" v-ripple>
+                                        <q-item-section avatar>
+                                            <q-checkbox v-on:click="showStreetsNames($event)" v-model="isShowStreetsChecked" color="checkbox" val="20"></q-checkbox>
+                                        </q-item-section>
+                                        <q-item-section>
+                                            <q-item-label>Show Street Names Enabled</q-item-label>
+                                            <q-item-label class="text-h7" caption>Disabling this will make it so you can't see street names / locations</q-item-label>
+                                        </q-item-section>
+                                    </q-item>
+                                    <q-item borderless tag="label" v-ripple>
+                                        <q-item-section avatar>
+                                            <q-checkbox v-on:click="showPointerIndex($event)" v-model="isPointerShowChecked" color="checkbox" val="21"></q-checkbox>
+                                        </q-item-section>
+                                        <q-item-section>
+                                            <q-item-label>Show Compass Pointer Enabled</q-item-label>
+                                            <q-item-label class="text-h7" caption>Disabling this will make it so you can't see your pointer index to pinpoint your exact cardinal directions</q-item-label>
+                                        </q-item-section>
+                                    </q-item>
+                                    <q-item borderless tag="label" v-ripple>
+                                        <q-item-section avatar>
+                                            <q-checkbox v-on:click="showDegreesNum($event)" v-model="isDegreesShowChecked" color="checkbox" val="22"></q-checkbox>
+                                        </q-item-section>
+                                        <q-item-section>
+                                            <q-item-label>Show Compass Degrees Enabled</q-item-label>
+                                            <q-item-label class="text-h7" caption>Disabling this will make it so you can't see your exact degrees</q-item-label>
+                                        </q-item-section>
+                                    </q-item>
+                                </div>
+                                <hr>
+                                <div class="text-h6 q-mb-md">Cinematic Mode</div>
+                                <div class="text-h7">
+                                    <q-checkbox v-on:click="cinematicMode($event)" label='Enabled' v-model="isCineamticModeChecked" color="checkbox" val="23" style="display: flex;"></q-checkbox>
+                                </div>
+                                <br>
+                            </q-tab-panel>
+                        </q-tab-panels>
+                    </template>
+                </q-splitter>
+            </div>
+        </div>
+        <div id="main-container">
+            <div id="money-container">
+                <div id="money-cash">
+                    <transition name="slide-fade">
+                        <p v-if="showCash"><span id="sign">$&nbsp;</span><span id="money">{{(cash)}}</span></p>
+                    </transition>
+                </div>
+                <div id="money-bank">
+                    <transition name="slide-fade">
+                        <p v-if="showBank"><span id="sign">$&nbsp;</span><span id="bank">{{(bank)}}</span></p>
+                    </transition>
+                </div>
+                <div id="money-change" v-if="showUpdate">
+                    <p v-if="plus" id="money"><span id="plus">+&nbsp;</span><span id="money">{{(amount)}}</span></p>
+                    <p v-else-if="minus" id="minus"><span id="minus">-&nbsp;</span><span id="money">{{(amount)}}</span></p>
+                </div>
+            </div>
+            <div id="ui-container">
+                <div id="playerHud" v-show="show">
+                    <!--
+                        Servidor: the voice ring is NOT here. Voice state is already said twice - by
+                        the microphone panel at the top right, which gives the range mode and
+                        whether the radio is keyed, and by pma-voice's own readout at the bottom.
+                        A third indicator in the status column repeated the least of the three.
+                        See ADR-161.
+                    -->
+                    <!--
+                        Servidor: the drug effect. Sits FIRST so it appears above health rather than
+                        at the bottom of a column whose length changes - a mark that moves is a mark
+                        you have to look for. See ADR-163.
+                    -->
+                    <transition name="fade">
+                    <div v-if="showDrug" :title="drugLabel">
+                        <q-circular-progress class="q-ml-xl" style="opacity: 40%;" :value="static" size="50px" :thickness="0.24" color="drug" :min="0" :max="100"></q-circular-progress>
+                        <q-circular-progress class="q-ml-xl" style="left: -50%;" show-value :value="static" size="50px" :thickness="0.24" color="drug" :min="0" :max="100" center-color="grey-10">
+                        <q-icon :name="'fas fa-' + drugIcon" size="19.5px" color="white"/>
+                    </div>
+                    </transition>
+                    <transition name="fade">
+                    <div v-if="showHealth">
+                        <q-circular-progress class="q-ml-xl" style="opacity: 40%;" :value="static" size="50px" :thickness="0.24" :style="{color: healthColor}" :min="0" :max="100"></q-circular-progress>
+                        <q-circular-progress class="q-ml-xl" style="left: -50%;" show-value :value="health" size="50px" :thickness="0.24" :style="{color: healthColor}" :min="0" :max="100" center-color="grey-10">
+                        <q-icon style="top: -0.5px; left: -0.4px;" name="fas fa-heart" size="19.5px" color="white"/>
+                    </div>
+                    </transition>
+                    <transition name="fade">
+                    <div v-if="showArmor">
+                        <q-circular-progress class="q-ml-xl" style="opacity: 40%;" :value="static" size="50px" :thickness="0.24" :style="{color: armorColor}" :min="0" :max="100"></q-circular-progress>
+                        <q-circular-progress class="q-ml-xl" style="left: -50%;" show-value :value="armor" size="50px" :thickness="0.24" :style="{color: armorColor}" :min="0" :max="100" center-color="grey-10">
+                        <q-icon name="fas fa-shield-alt" size="19.5px" color="white"/>
+                    </div>
+                    </transition>
+                    <transition name="fade">
+                    <div v-if="showHunger">
+                        <q-circular-progress class="q-ml-xl" style="opacity: 40%;" :value="static" size="50px" :thickness="0.24" :style="{color: hungerColor}" :min="0" :max="100"></q-circular-progress>
+                        <q-circular-progress class="q-ml-xl" style="left: -50%;" show-value :value="hunger" size="50px" :thickness="0.24" :style="{color: hungerColor}" :min="0" :max="100" center-color="grey-10">
+                        <q-icon style="top: -1px; left: -0.5px;" name="fas fa-hamburger" size="19.5px" color="white"/>
+                    </div>
+                    </transition>
+                    <transition name="fade">
+                    <div v-if="showThirst">
+                        <q-circular-progress class="q-ml-xl" style="opacity: 40%;" :value="static" size="50px" :thickness="0.24" :style="{color: thirstColor}" :min="0" :max="100"></q-circular-progress>
+                        <q-circular-progress class="q-ml-xl" style="left: -50%;" show-value :value="thirst" size="50px" :thickness="0.24" :style="{color: thirstColor}" :min="0" :max="100" center-color="grey-10">
+                        <q-icon style="top: -0.5px; left: -0.5px;" name="fas fa-tint" size="19.5px" color="white"/>
+                    </div>
+                    </transition>
+                    <transition name="fade">
+                    <div v-if="showStress">
+                        <q-circular-progress class="q-ml-xl" style="opacity: 40%;" :value="static" size="50px" :thickness="0.24" color="stress" :min="0" :max="100"></q-circular-progress>
+                        <q-circular-progress class="q-ml-xl" style="left: -50%;" show-value :value="stress" size="50px" :thickness="0.24" color="stress" :min="0" :max="100" center-color="grey-10">
+                        <q-icon style="top: -0.5px; left: -0.5px;" name="fas fa-brain" size="19.5px" color="white"/>
+                    </div>
+                    </transition>
+                    <transition name="fade">
+                    <div v-if="showOxygen">
+                        <q-circular-progress class="q-ml-xl" style="opacity: 40%;" :value="static" size="50px" :thickness="0.24" color="oxygen" :min="0" :max="100"></q-circular-progress>
+                        <q-circular-progress class="q-ml-xl" style="left: -50%;" show-value :value="oxygen" size="50px" :thickness="0.24" color="oxygen" :min="0" :max="100" center-color="grey-10">
+                        <q-icon style="top: -2px; left: -0.1px;" name="fas fa-lungs" size="19.5px" color="white"/>
+                    </div>
+                    </transition>
+                    <transition name="fade">
+                    <div v-if="showEngine">
+                        <q-circular-progress class="q-ml-xl" style="opacity: 40%;" :value="static" size="50px" :thickness="0.24" :style="{color: engineColor}" :min="0" :max="100"></q-circular-progress>
+                        <q-circular-progress class="q-ml-xl" style="left: -50%;" show-value :value="engine" size="50px" :thickness="0.24" :style="{color: engineColor}" :min="0" :max="100" center-color="grey-10">
+                        <q-icon style="top: -1px;" name="fas fa-oil-can" size="19.5px":style="{color: engineColor}"/>
+                    </div>
+                    </transition>
+                    <transition name="fade">
+                    <div v-if="showHarness">
+                        <q-circular-progress class="q-ml-xl" style="opacity: 40%;" :value="static" size="50px" :thickness="0.24" color="harness" :min="0" :max="100"></q-circular-progress>
+                        <q-circular-progress class="q-ml-xl" style="left: -50%;" show-value :value="hp" size="50px" :thickness="0.24" color="harness" :min="0" :max="100" center-color="grey-10">
+                        <q-icon name="fas fa-user-slash" size="19.5px" color="white"/>
+                    </div>
+                    </transition>
+                    <transition name="fade">
+                    <div v-if="showNos">
+                        <q-circular-progress class="q-ml-xl" style="opacity: 40%;" :value="static" size="50px" :thickness="0.24" color="nos" :min="0" :max="100"></q-circular-progress>
+                        <q-circular-progress class="q-ml-xl" style="left: -50%;" show-value :value="nos" size="50px" :thickness="0.24" color="nos" :min="0" :max="100" center-color="grey-10">
+                        <q-icon name="fas fa-meteor" size="19.5px" :style="{color: nosColor}"/>
+                    </div>
+                    </transition>
+                </div>
+            </div>
+        <!--
+            Servidor: the microphone panel was HERE and is gone. It was a third indicator of voice
+            state, and the least useful of the three - pma-voice draws its own readout with the
+            range mode, and that one is enough. See ADR-161.
+        -->
+        <!--
+            Servidor: the ammo counter, an FPS-style readout that only exists while a weapon that
+            takes ammo is in hand. Its own Vue app on its own container, matching how this file
+            already mounts money, player, vehicle and compass separately - a fifth small app is
+            cheaper to reason about than a fifth concern bolted onto one of the others.
+        -->
+        <div id="ammo-container">
+            <transition name="fade">
+                <div id="ammo-panel" v-if="show" :class="{ 'ammo-empty': clip === 0, 'ammo-low': clip > 0 && low }">
+                    <!--
+                        Weapon silhouettes come from the icon pack in `html/weapons/`, applied as a
+                        CSS MASK rather than as an `<img>`. The source art is grey, and a mask
+                        throws the source colour away entirely - only its alpha is used - so the
+                        panel colours the glyph itself and the low/empty states tint the gun along
+                        with the number. An `<img>` would need a filter chain to do the same and
+                        could not hit an arbitrary colour.
+                    -->
+                    <div id="ammo-icon" :style="{ WebkitMaskImage: 'url(weapons/' + weaponClass + '.png)', maskImage: 'url(weapons/' + weaponClass + '.png)' }"></div>
+                    <div id="ammo-figures">
+                        <div id="ammo-clip">{{ clip }}</div>
+                        <div id="ammo-reserve">{{ reserve }}</div>
+                    </div>
+                </div>
+            </transition>
+        </div>
+        <div id="veh-container">
+            <!--
+                Servidor: the Need for Speed style readout - a centred number over a sweep bar,
+                replacing the small circular dial that sat off to the left. The dial markup below is
+                kept and hidden in CSS rather than deleted: every one of those `q-circular-progress`
+                elements is bound to data this component still receives, and removing them would
+                mean rewriting `vehicleHud()` too. Hidden, they cost nothing and the diff stays
+                readable against upstream.
+            -->
+            <div id="cluster" v-show="show">
+                <!--
+                    A real analogue dial: a 180-degree sweep with numbered major ticks and a needle.
+                    Everything is drawn from one circle - centre (100,100), radius 80 - so the arc,
+                    the ticks, the numbers and the needle pivot can never drift apart the way they
+                    would if each were positioned by eye.
+
+                    Geometry, for whoever changes the range: a value `v` sits at angle
+                    `180 - (v / 240) * 180` degrees, measured anticlockwise from the positive x
+                    axis. SVG's y grows downward, so a point on the dial is
+                    `(100 + 80*cos(theta), 100 - 80*sin(theta))`. Every coordinate below was worked
+                    out from that, not eyeballed.
+                -->
+                <svg id="gauge" viewBox="0 0 200 116" aria-hidden="true">
+                    <path id="gauge-track" d="M20 100 A 80 80 0 0 1 180 100" />
+                    <path id="gauge-fill" d="M20 100 A 80 80 0 0 1 180 100"
+                          :style="{ strokeDashoffset: 251.33 - Math.min(speed / 240, 1) * 251.33 }" />
+
+                    <g id="gauge-ticks">
+                        <line x1="28"     y1="100"   x2="20"     y2="100" />
+                        <line x1="37.65"  y1="64"    x2="30.72"  y2="60" />
+                        <line x1="64"     y1="37.65" x2="60"     y2="30.72" />
+                        <line x1="100"    y1="28"    x2="100"    y2="20" />
+                        <line x1="136"    y1="37.65" x2="140"    y2="30.72" />
+                        <line x1="162.35" y1="64"    x2="169.28" y2="60" />
+                        <line x1="172"    y1="100"   x2="180"    y2="100" />
+                    </g>
+
+                    <g id="gauge-numbers">
+                        <text x="38"  y="100">0</text>
+                        <text x="46"  y="69">40</text>
+                        <text x="69"  y="46">80</text>
+                        <text x="100" y="38">120</text>
+                        <text x="131" y="46">160</text>
+                        <text x="154" y="69">200</text>
+                        <text x="162" y="100">240</text>
+                    </g>
+
+                    <text id="gauge-value" x="100" y="84">{{ speed }}</text>
+                    <text id="gauge-unit" x="100" y="99">km/h</text>
+                </svg>
+
+                <div id="cluster-row">
+                    <div class="cluster-item">
+                        <!-- A pedal, drawn inline: Font Awesome 5 has no pedal glyph. -->
+                        <svg class="cluster-glyph" viewBox="0 0 16 16" aria-hidden="true">
+                            <rect x="4" y="1.5" width="7" height="10" rx="1.6" transform="rotate(10 7.5 6.5)"/>
+                            <rect x="3" y="12.5" width="10" height="1.8" rx="0.9"/>
+                        </svg>
+                        <span id="cluster-gear">{{ gear }}</span>
+                    </div>
+
+                    <!--
+                        The pump IS the gauge: no separate bar. The same silhouette is drawn twice,
+                        once dim and once in the fuel colour, and the coloured copy is clipped to a
+                        rectangle whose top edge is the fuel level. The clip fills from the bottom,
+                        so the pump empties downward like a real tank.
+
+                        `fuel` arrives already multiplied by 0.71 in `vehicleHud()` - that is
+                        upstream's scaling for the old circular gauge - so it is divided back out
+                        here to recover a plain 0-100.
+                    -->
+                    <svg id="cluster-fuel" viewBox="0 0 16 16" aria-hidden="true">
+                        <defs>
+                            <clipPath id="fuel-clip">
+                                <rect x="0" width="16"
+                                      :y="16 - Math.min(fuel / 0.71, 100) * 0.16"
+                                      :height="Math.min(fuel / 0.71, 100) * 0.16" />
+                            </clipPath>
+                        </defs>
+                        <g id="fuel-empty">
+                            <path d="M2.6 2.4A1.8 1.8 0 0 1 4.4.6h3.4a1.8 1.8 0 0 1 1.8 1.8v13.1h-7z"/>
+                            <path d="M10.6 4.1l2.3 1.7v6.3a1.15 1.15 0 0 1-2.3 0V8.9h-1V7.6h1z"/>
+                        </g>
+                        <g id="fuel-full" clip-path="url(#fuel-clip)" :style="{ fill: fuelColor }">
+                            <path d="M2.6 2.4A1.8 1.8 0 0 1 4.4.6h3.4a1.8 1.8 0 0 1 1.8 1.8v13.1h-7z"/>
+                            <path d="M10.6 4.1l2.3 1.7v6.3a1.15 1.15 0 0 1-2.3 0V8.9h-1V7.6h1z"/>
+                        </g>
+                    </svg>
+
+                    <div class="cluster-lamp" :class="{ on: !seatbeltOn }">
+                        <q-icon name="fas fa-user-slash" size="11px"/>
+                    </div>
+                </div>
+            </div>
+                <div v-show="show">
+                    <div class="responsive" id="speedometer">
+                        <q-circular-progress class="q-ml-xl" style="transform: rotate(-150deg); opacity: 60%;" :value="speedometer" size="70px" :thickness="0.21" color="gauge" :min="0" :max="100"></q-circular-progress>
+                        <q-circular-progress class="q-ml-xl" style="transform: rotate(-150deg); left: -50%;" show-value :value="speed" size="70px" :thickness="0.21" color="gauge" :min="0" :max="600">
+                        <speed>{{(speed)}}</speed>
+                    </div>
+                    <div class="responsive" id="fuelgauge">
+                        <q-circular-progress class="q-ml-xl" style="transform: rotate(-125deg); opacity: 60%;" :value="fuelgauge" size="36px" :thickness="0.21" color="gauge" :min="0" :max="100"></q-circular-progress>
+                        <q-circular-progress class="q-ml-xl" style="transform: rotate(-125deg); left: -50%;" show-value :value="fuel" size="36px" :thickness="0.21" :style="{color: fuelColor}">
+                        <q-icon name="fas fa-gas-pump" style="transform: rotate(125deg);" size="14px" color="white"/>
+                    </div>
+                    <div class="responsive" id="altitudegauge" v-if="showAltitude">
+                        <q-circular-progress class="q-ml-xl" style="transform: rotate(-135deg); opacity: 60%;" :value="altitudegauge" size="70px" :thickness="0.21" color="gauge" :min="0" :max="100"></q-circular-progress>
+                        <q-circular-progress class="q-ml-xl" style="transform: rotate(-135deg); left: -50%;" show-value :value="altitude" size="70px" :thickness="0.21" color="gauge" :min="0" :max="750">
+                        <altitude>{{(altitude)}}</altitude>
+                    </div>
+                    <transition name="fade">
+                    <div class="responsive" id="seatbelt" v-if="showSeatbelt">
+                        <q-circular-progress class="q-ml-xl" style="transform: rotate(-125deg); opacity: 60%;" size="70px" :thickness="0.21" color="gauge" :min="0" :max="100"></q-circular-progress>
+                        <q-circular-progress class="q-ml-xl" style="transform: rotate(-125deg); left: -40%;" show-value size="70px" :thickness="0.21" color="gauge" :min="0" :max="750">
+                        <q-icon name="fas fa-user-slash" style="transform: rotate(125deg);" :value="seatbelt" size="21px" :style="{color: seatbeltColor}"/>
+                    </div>
+                    </transition>
+                    <div class="border">
+                        <div class="square" v-if="showSquare"></div>
+                    </div>
+                    <div class="border">
+                        <div class="circle" v-if="showCircle"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,159 @@
+<div id="panel" class="hidden">
+  <div class="head">
+    <span class="title">Estado do personagem</span>
+    <span class="hint">F7 para fechar.</span>
+  </div>
+
+  <div class="lives">
+    <div class="pips" id="pips"></div>
+    <div class="count"><span id="count">--</span><span class="max" id="max"></span></div>
+  </div>
+
+  <div class="rows">
+    <div class="row">
+      <span class="label">Situação</span>
+      <span class="value" id="status">—</span>
+    </div>
+    <div class="row" id="row-debt">
+      <span class="label">Dívida com o hospital</span>
+      <span class="value bad" id="debt">—</span>
+    </div>
+  </div>
+
+  <div class="foot" id="foot">
+    Vidas perdidas só podem ser recompradas no hospital.
+  </div>
+</div>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Rajdhani:wght@600;700&display=swap');
+
+  html, body { background: transparent !important; margin: 0; overflow: hidden; }
+
+  /* Servidor: same tokens as the downed panel and the scoreboard - panel #0f0f0f, hairline
+     rgba(255,255,255,.14), #f2f2f2 over #a3a3a3, Rajdhani for headings, Inter for rows. */
+  #panel {
+    position: absolute;
+    top: 50%;
+    right: 3vw;
+    transform: translateY(-50%);
+    width: 320px;
+    background: #0f0f0f;
+    border: 1px solid rgba(255, 255, 255, .14);
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    color: #f2f2f2;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .55);
+  }
+
+  #panel.hidden { display: none; }
+
+  .head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, .14);
+  }
+
+  .title {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+  }
+
+  .hint { font-size: 10px; color: #a3a3a3; letter-spacing: .04em; }
+
+  .lives { padding: 18px 16px 12px; text-align: center; }
+
+  /* One pip per life. Reading a row of marks is faster than reading a number, and the empty ones
+     make "how close am I to the end" visible without arithmetic. */
+  .pips { display: flex; gap: 4px; justify-content: center; margin-bottom: 12px; }
+
+  .pip {
+    width: 18px;
+    height: 6px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, .14);
+  }
+
+  .pip.on { background: #3ecf7e; }
+  .pip.on.low { background: #ff9500; }
+  .pip.on.critical { background: #ff4d4d; }
+
+  .count {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 34px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .max { color: #a3a3a3; font-size: 18px; }
+
+  .rows { padding: 4px 0 8px; }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 7px 16px;
+    font-size: 12px;
+  }
+
+  .label { color: #a3a3a3; }
+  .value { font-weight: 500; }
+  .value.bad { color: #ff4d4d; }
+  .value.ok { color: #3ecf7e; }
+  .value.warn { color: #ff9500; }
+
+  .foot {
+    padding: 10px 16px;
+    border-top: 1px solid rgba(255, 255, 255, .14);
+    font-size: 10.5px;
+    color: #a3a3a3;
+    line-height: 1.45;
+  }
+</style>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  window.addEventListener('message', (event) => {
+    const d = event.data;
+    if (d.action !== 'lives') return;
+
+    if (!d.show) {
+      $('panel').classList.add('hidden');
+      return;
+    }
+
+    $('panel').classList.remove('hidden');
+
+    const tone = d.lives <= 1 ? 'critical' : d.lives <= 3 ? 'low' : '';
+
+    $('pips').innerHTML = Array.from({ length: d.max }, (_, i) =>
+      `<span class="pip ${i < d.lives ? 'on ' + tone : ''}"></span>`).join('');
+
+    $('count').textContent = d.lives;
+    $('max').textContent = ' / ' + d.max;
+
+    const status = $('status');
+    if (d.blocked) {
+      status.textContent = 'Bloqueado.';
+      status.className = 'value bad';
+    } else if (d.lives <= 3) {
+      status.textContent = 'Crítico.';
+      status.className = 'value warn';
+    } else {
+      status.textContent = 'Estável.';
+      status.className = 'value ok';
+    }
+
+    const debt = $('debt');
+    debt.textContent = d.debt > 0 ? 'R$ ' + d.debt + '.' : 'Nenhuma.';
+    debt.className = d.debt > 0 ? 'value bad' : 'value ok';
+  });
+</script>

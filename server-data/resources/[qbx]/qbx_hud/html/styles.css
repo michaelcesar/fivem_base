@@ -1,0 +1,611 @@
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');@import url('https://fonts.cdnfonts.com/css/pricedown');@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Yantramanav:wght@100;300;400;500;700;900&display=swap');@import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Yantramanav:wght@100;300;400;500;700;900&display=swap');
+
+/* Servidor: the band across the top of the screen.
+ *
+ * This page loads Quasar from a CDN, and Quasar ships a CSS reset that paints `body`. Nothing here
+ * ever overrode it, so the body background rendered - and because `body` has no height of its own,
+ * it painted exactly the height of its first child (the compass container) as a full-width bar at
+ * the top of the screen.
+ *
+ * `ox_inventory` already carries this same override for the same reason; this page never got it.
+ * See ADR-161.
+ */
+html,
+body {
+  background: transparent !important;
+}
+
+/* Menu */
+div#openmenu { display: none; position: absolute; width: 50%; top: 45%; left: 50%; transform: translate(-50%,-50%); }
+.brand-logo { width: 25%; } /* when using an svg all you need to change is the width and it will resize it */
+
+/* Menu tab & panel styles */
+.text-tabcolor { color: rgb(255, 255, 255)!important; }
+.bg-active-tab { background: rgb(23 23 23)!important; }
+.bg-panel { background: rgb(30 30 30)!important; }
+.q-tab-panels { border-top-right-radius: 12px!important; border-bottom-right-radius: 12px!important; } /* change all 12px for a different border radius (rounds edges of the menu) */
+.q-splitter__panel.q-splitter__before { border-top-left-radius: 12px!important; border-bottom-left-radius: 12px!important; } /* change all 12px for a different border radius (rounds edges of the menu) */
+.q-tabs--vertical.q-tabs--not-scrollable .q-tabs__content { border-top-left-radius: 12px!important; border-bottom-left-radius: 12px!important; } /* change all 12px for a different border radius (rounds edges of the menu) */
+
+/* Menu text styles */
+.text-h6 { color: rgb(255, 255, 255)!important; }
+.text-h7 { color: rgba(255, 255, 255, 0.8)!important; }
+
+/* Menu buttons & checkboxes & toggle switch icons styles */
+.text-textbutton { color: rgb(0, 0, 0)!important; }
+.bg-bgbutton { background: rgba(241, 229, 66, 0.651)!important; }
+.q-checkbox__inner { color: rgb(255 255 255 / 70%)!important; }
+.text-checkbox { color: rgba(241, 229, 66, 0.651)!important; }
+.q-checkbox__svg { color: rgb(0, 0, 0)!important; }
+.q-checkbox__inner--truthy .q-checkbox__bg { box-shadow: 0px 0px 3px 3px rgb(220 20 60 / 15%)!important; } /* if you want the checkboxes to have a glow/shadow */
+.text-toggleicons { color: rgb(0, 0, 0)!important; }
+
+/* Menu misc */
+hr { opacity: 0.1!important; } /* horizontal line that seperates sections */
+.q-mb-md { margin-bottom: 0px!important; } /* removes extra top padding */
+.q-mb-md-d { padding-left: 10px!important; padding-bottom: 10px!important;} /* keeps q-items aligned */
+.q-item { padding: 8px 0px!important; } /* keeps q-items aligned */
+.q-item__section--avatar { min-width: 40px!important } /* keeps q-items aligned */
+.q-item__section--side { padding-right: 0px!important; } /* keeps q-items aligned */
+.q-splitter--vertical>.q-splitter__separator { width: 0px!important; } /* keeps navigation tab panel seamless */
+div#q-loading-bar { display: none!important; } /* makes sure there's no ajax load from quasar */
+::-webkit-scrollbar { display: none!important; } /* makes sure there's no ugly scrollbar on menu*/
+
+/* Hud radial styles */
+.text-health { color: rgb(33, 171, 97)!important; }
+.text-stress { color: rgb(255, 0, 0)!important; }
+.text-nos { color: rgb(255, 72, 133)!important; }
+.text-cruise { color: rgb(255, 72, 133)!important; }
+.text-armed { color: rgb(255, 72, 133)!important; }
+.text-harness { color: rgb(182, 72, 255)!important; }
+.text-oxygen { color: rgb(138, 168, 189)!important; }
+.text-parachute { color: rgb(0, 0, 0)!important; }
+.text-dev { color: rgb(0, 0, 0)!important; }
+/* Servidor: the drug-effect ring. Green, the theme's one positive-outcome colour - an effect the
+   player chose to take is not a warning. See ADR-163. */
+.text-drug { color: rgb(62, 207, 126)!important; }
+.text-gauge { color: rgb(255, 255, 255)!important; }
+
+#main-container {
+  width: 100%;
+  height: auto;
+}
+
+/* Money */
+#money-container {
+  position: absolute;
+  right: 2vw;
+  top: 5vh;
+  font-weight: 400;
+  font-size: 40px;
+}
+
+#sign, #bank {
+  font-family: 'Pricedown Bl', sans-serif;
+  text-align: right;
+  color: #00ac31;
+  text-shadow: -1px -1px 0 rgba(0,0,0, 0.7), 1px -1px 0 rgba(0,0,0, 0.7), -1px 1px 0 rgba(0,0,0, 0.7), 1px 1px 0 rgba(0,0,0, 0.7);
+}
+
+#plus {
+  font-size: 50px;
+  font-family: 'Pricedown Bl', sans-serif;
+  text-align: right;
+  color: #00ac31;
+  text-shadow: -1px -1px 0 rgba(0,0,0, 0.7), 1px -1px 0 rgba(0,0,0, 0.7), -1px 1px 0 rgba(0,0,0, 0.7), 1px 1px 0 rgba(0,0,0, 0.7);
+}
+
+#minus {
+  font-size: 50px;
+  font-family: 'Pricedown Bl', sans-serif;
+  text-align: right;
+  color: #ac0000;
+  text-shadow: -1px -1px 0 rgba(0,0,0, 0.7), 1px -1px 0 rgba(0,0,0, 0.7), -1px 1px 0 rgba(0,0,0, 0.7), 1px 1px 0 rgba(0,0,0, 0.7);
+}
+
+#money {
+  font-family: 'Pricedown Bl', sans-serif;
+  text-align: right;
+  color: #ffffff;
+  text-shadow: -1px -1px 0 rgba(0,0,0, 0.7), 1px -1px 0 rgba(0,0,0, 0.7), -1px 1px 0 rgba(0,0,0, 0.7), 1px 1px 0 rgba(0,0,0, 0.7);
+}
+
+/* Player HUD */
+
+#playerhud {
+  position: absolute;
+  display: flex;
+  left: 3vh;
+  bottom: 0.2vw;
+}
+
+.q-ml-xl {
+  margin-left: -22px!important; /* Change this to space radials */
+}
+
+/* Vehicle HUD */
+
+speed:after {
+  content: "KM/H"; /* Servidor: km/h, paired with `useMPH = false` in config/client.lua */
+  display: block;
+  padding-top: 3px;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-bottom: 8px;
+  font-weight: 900;
+}
+
+altitude:after {
+  content: "ALT";
+  display: block;
+  padding-top: 10px;
+  padding-left: 2px;
+  padding-right: 2px;
+  font-weight: 900;
+}
+
+speed {
+  transform: rotate(150deg);
+  font-size: 2.4vh;
+  position: fixed; 
+  color: #fff; 
+  text-align: center;
+  font-weight: 600;
+  text-shadow: -1px -1px 0 rgba(0,0,0, 0.7), 1px -1px 0 rgba(0,0,0, 0.7), -1px 1px 0 rgba(0,0,0, 0.7), 1px 1px 0 rgba(0,0,0, 0.7); 
+}
+
+altitude {
+  transform: rotate(135deg);
+  font-size: 2.4vh;
+  position: fixed; 
+  color: #fff; 
+  text-align: center;
+  font-weight: 600;
+  text-shadow: -1px -1px 0 rgba(0,0,0, 0.7), 1px -1px 0 rgba(0,0,0, 0.7), -1px 1px 0 rgba(0,0,0, 0.7), 1px 1px 0 rgba(0,0,0, 0.7); 
+}
+
+.border {
+  bottom: 7.9%;
+  left: 1.3%;
+  width: 0%;
+  text-align: center;
+}
+
+.square {
+  bottom: 6.30%;
+  width: 29vh;
+  height: 18.5vh;
+  border: 4px solid #bababa;
+  position: absolute;
+  display: inline-block;
+}
+
+.circle {
+  bottom: 6.9%;
+  width: 27vh;
+  height: 22.9vh;
+  border: 4px solid #bababa;
+  position: absolute;
+  display: inline-block;
+  border-radius: 50%;
+}
+
+/* Animation */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Compass */
+.baseplate {
+  position: relative;
+  margin: 0 auto;
+  top: -0.8vh;
+	width: 150px;
+  height: auto;
+}
+
+.street-container {
+  position: relative;
+  top: 0.5vh;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.4vh;
+  letter-spacing: 0.7px;
+  text-decoration: none;
+  font-style: normal;
+  font-variant: small-caps;
+  text-transform: none;
+  font-weight: 400;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.6), 0 0 1px rgba(0, 0, 0, 0.6), 0 0 1px rgba(0, 0, 0, 0.6), 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+.street1 {
+  position: absolute;
+  margin: 0 auto;
+  right: 55%;
+  text-align: right!important;
+  color: rgb(255, 255, 255);
+}
+
+.street2 {
+  position: absolute;
+  margin: 0 auto;
+  left: 55%;
+  text-align: left!important;
+  color: rgb(255, 255, 255);
+}
+
+.pointer {
+  position: absolute;
+  margin: 0 auto;
+  top: -2%;
+  left: 0;
+  right: 0;
+  font-family: 'Yantramanav', sans-serif;
+  color: rgb(255, 255, 255);
+  font-size: 2.2vh;
+  text-align: center;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.6), 0 0 1px rgba(0, 0, 0, 0.6), 0 0 1px rgba(0, 0, 0, 0.6), 0 0 1px rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+}
+
+.degrees {
+  position: absolute;
+  margin: 0 auto;
+  top: 80%;
+  left: 0;
+  right: 0;
+  opacity: 0.8;
+  font-family: 'Yantramanav', sans-serif;
+  color: rgb(255, 255, 255);
+  font-size: 1.5vh;
+  font-weight: 400;
+  text-align: center;
+  text-shadow: 0 0 1px rgb(0 0 0 / 60%), 0 0 1px rgb(0 0 0 / 60%), 0 0 1px rgb(0 0 0 / 60%), 0 0 1px rgb(0 0 0 / 60%);
+}
+
+.bezel {
+  position: relative;
+  width:100%;
+  height: 2vh;
+  font-family: 'Yantramanav', sans-serif;
+  font-size: 0.35vh;
+  font-weight: 700;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.6), 0 0 1px rgba(0, 0, 0, 0.6), 0 0 1px rgba(0, 0, 0, 0.6), 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+.bearing {
+  position: relative;
+  width:100%;
+  top: -0.5vh;
+  height: 3.5vh;
+  padding-left: 0.12vw;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 2.3vh;
+  letter-spacing: 0.7px;
+  text-decoration: none;
+  font-style: normal;
+  font-variant: small-caps;
+  text-transform: none;
+  font-weight: 400;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.6), 0 0 1px rgba(0, 0, 0, 0.6), 0 0 1px rgba(0, 0, 0, 0.6), 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+/* ==========================================================================
+   Servidor HUD
+   ==========================================================================
+
+   Appended rather than edited in place, so what this project changed stays one
+   readable block against upstream. Everything here is deliberately high in the
+   cascade (last wins at equal specificity) and uses `!important` only where it
+   has to beat `html/responsive.css`, which sets `!important` on every one of its
+   own vehicle rules across five breakpoints.
+
+   Three changes, all requested:
+     1. Player status moved LEFT and made subtle.
+     2. An FPS-style ammo readout on the RIGHT.
+     3. The speedometer CENTRED, redrawn Need-for-Speed style, in km/h.
+   ========================================================================== */
+
+
+/* --- Shared type ---------------------------------------------------------
+
+   Rajdhani everywhere in the two new panels, matching the ox_lib fork's own
+   display face. Deliberately NOT 'Pricedown Bl', which the money and street
+   readouts still use: that is GTA's own brand voice, and the instrument panels
+   are ours. `font-variant-numeric: tabular-nums` on every figure that changes,
+   so digits do not shuffle sideways as the value moves. */
+#ammo-panel,
+#cluster {
+  font-family: 'Rajdhani', 'Roboto', sans-serif;
+  pointer-events: none;
+}
+
+/* --- 2. Ammo, bottom right ----------------------------------------------
+
+   Laid out as icon-left / figures-right, with the magazine large and the
+   reserve tucked under it at roughly a third the size. The two numbers are
+   NOT separated by a slash: at this size the size difference already says
+   which is which, and the slash was the only thing making it read as a
+   fraction rather than as a gun. */
+
+#ammo-container {
+  position: absolute;
+  right: 2.2vw;
+  bottom: 4vh;
+}
+
+#ammo-panel {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+}
+
+/* Sized by HEIGHT with a wide box, because the trimmed art keeps each weapon's
+   own aspect ratio - a pistol is squat, a sniper is long. `mask-size: contain`
+   plus `mask-position: right center` means every glyph lands with its muzzle at
+   the same edge, so the numbers beside it never shift as weapons change. */
+#ammo-icon {
+  width: 9vw;
+  height: 4.4vh;
+  background-color: rgba(255, 255, 255, 0.9);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: right center;
+  mask-position: right center;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.95));
+  transition: background-color 160ms ease;
+}
+
+#ammo-figures {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 0.92;
+}
+
+#ammo-clip {
+  font-size: 5vh;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  text-shadow: 0 2px 7px rgba(0, 0, 0, 0.95);
+  transition: color 160ms ease;
+}
+
+#ammo-reserve {
+  font-size: 1.9vh;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.62);
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.95);
+  margin-top: 0.2vh;
+}
+
+/* A third of the magazine left, then empty. Two states, not a gradient - a HUD
+   is read at a glance and a slowly shifting hue reads as nothing at all. */
+#ammo-panel.ammo-low #ammo-clip { color: #ffb020; }
+#ammo-panel.ammo-low #ammo-icon { background-color: rgba(255, 176, 32, 0.9); }
+#ammo-panel.ammo-empty #ammo-clip { color: #ff4444; }
+#ammo-panel.ammo-empty #ammo-icon { background-color: rgba(255, 68, 68, 0.9); }
+
+/* --- 3. Speedometer: analogue dial, centred -------------------------------
+
+   The upstream circular gauges are hidden, not removed - see the comment in
+   index.html. `!important` is required on every one of these: responsive.css
+   sets `!important` on `.responsive`, `#speedometer`, `#fuelgauge`,
+   `#altitudegauge` and `#seatbelt` at five separate breakpoints, and without it
+   the old dials reappear the moment the window crosses one. */
+#veh-container .responsive,
+#veh-container .border {
+  display: none !important;
+}
+
+#cluster {
+  position: absolute;
+  left: 50%;
+  bottom: 2.4vh;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 15.5vw;
+  min-width: 210px;
+  max-width: 300px;
+}
+
+/* No `overflow: visible` here, unlike the first attempt at this panel: the arc
+   was drawn on a 150-unit radius inside a 34-unit-tall box, so it escaped its
+   own viewBox and swept most of the screen. The dial is now sized to its box. */
+#gauge {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+#gauge-track,
+#gauge-fill {
+  fill: none;
+  stroke-linecap: round;
+  /* A 180-degree arc of radius 80 is pi * 80 = 251.33 units long. Hardcoding it
+     lets `stroke-dashoffset` be driven straight from the speed with no
+     `getTotalLength()` call, which would need JS and a mounted element. */
+  stroke-dasharray: 251.33;
+}
+
+#gauge-track {
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 2.5;
+}
+
+#gauge-fill {
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 3;
+  transition: stroke-dashoffset 90ms linear;
+}
+
+#gauge-ticks line {
+  stroke: rgba(255, 255, 255, 0.4);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+#gauge-numbers text {
+  fill: rgba(255, 255, 255, 0.65);
+  font-family: 'Rajdhani', 'Roboto', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+/* No outline on the figure. An earlier pass gave it a black `paint-order: stroke`
+   for legibility against bright road; it read as a border around the number,
+   which is worse than the contrast problem it solved. The drop shadow on the
+   panel behind it is enough. */
+#gauge-value {
+  fill: #fff;
+  font-family: 'Rajdhani', 'Roboto', sans-serif;
+  font-size: 34px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-anchor: middle;
+}
+
+#gauge-unit {
+  fill: rgba(255, 255, 255, 0.55);
+  font-family: 'Rajdhani', 'Roboto', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-anchor: middle;
+}
+
+#cluster-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1vw;
+  margin-top: -0.6vh;
+}
+
+.cluster-item {
+  display: flex;
+  align-items: center;
+  gap: 0.28vw;
+}
+
+/* Every glyph in this row is sized to the GEAR FIGURE, not to itself. Matching
+   the optical height of the number beside them is what makes the row read as one
+   line of instruments rather than three unrelated marks. */
+.cluster-glyph,
+#cluster-fuel,
+.cluster-lamp .q-icon {
+  width: 2.4vh;
+  height: 2.4vh;
+  font-size: 2.4vh;
+}
+
+.cluster-glyph {
+  fill: rgba(255, 255, 255, 0.4);
+}
+
+#cluster-gear {
+  font-size: 2.4vh;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
+}
+
+/* The pump silhouette IS the gauge - no separate bar. The dim copy is the empty
+   tank, the coloured copy is clipped to the level. */
+#fuel-empty {
+  fill: rgba(255, 255, 255, 0.22);
+}
+
+#fuel-full rect,
+#fuel-clip rect {
+  transition: y 220ms linear, height 220ms linear;
+}
+
+/* Warning lamps sit dim and light up when they mean something, like a real
+   cluster - an always-bright icon is decoration, not information. */
+.cluster-lamp {
+  color: rgba(255, 255, 255, 0.18);
+  transition: color 200ms ease;
+}
+
+.cluster-lamp.on {
+  color: #ff9500;
+}
+
+/* --- 5. Status rings, middle of the right edge ---------------------------
+
+   Position only. The rings themselves are stock QBox and untouched - this just
+   stacks them into a column and moves the column to the right edge, vertically
+   centred.
+
+   NOTE on the selector: upstream's own rule for this element is `#playerhud`,
+   all lowercase, while the markup is `id="playerHud"`. ID selectors are
+   case-sensitive in HTML5, so that rule has never matched anything and the
+   rings were placed by default document flow. This one applies.
+
+   The `-22px` on `.q-ml-xl` is left alone deliberately: it is what pulls each
+   stat's two rings - the dim track and the lit value - on top of each other.
+   Removing it would split every stat into two circles side by side. */
+#playerHud {
+  position: absolute;
+  /* Aligned with the ammo panel, which sits at `right: 2.2vw`.
+
+     The 25px is not padding - it is compensation. Each stat renders TWO rings,
+     and the lit one carries an inline `left: -50%`, which on a 50px ring pulls
+     it 25px left of its own layout box. So the box's right edge is 25px to the
+     right of anything visible, and matching `right` to the ammo panel would
+     leave the rings looking inset by exactly that much. */
+  right: calc(2.2vw - 25px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4vh;
+  pointer-events: none;
+}
+
+/* All white, matching the ammo readout. Upstream colours each ring by meaning -
+   red health, blue armour, amber engine - through an inline `:style` binding and
+   Quasar `color=` classes, so `!important` is needed on both: an `!important`
+   rule in a stylesheet outranks a plain inline style, which is the one case it
+   does.
+
+   The colour it removes was real information. It is being dropped by request in
+   favour of one palette across the whole HUD; the icon inside each ring still
+   says which stat it is. */
+#playerHud .q-circular-progress,
+#playerHud .q-icon {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+

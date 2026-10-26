@@ -1,0 +1,193 @@
+<div id="panel" class="hidden">
+  <div class="head">
+    <span class="dot"></span>
+    <span class="title">Você está caído</span>
+    <span class="timer" id="timer">--:--</span>
+  </div>
+
+  <div class="body">
+    <div class="row" id="row-ems">
+      <span class="key" id="ems-key">G</span>
+      <span class="text">
+        <span class="label" id="ems-label">Pedir socorro médico</span>
+        <span class="sub" id="ems-sub">Avisa os médicos de plantão.</span>
+      </span>
+      <span class="state" id="ems-state"></span>
+    </div>
+
+    <div class="row" id="row-npc">
+      <span class="key">Q</span>
+      <span class="text">
+        <span class="label" id="npc-label">Chamar ambulância</span>
+        <span class="sub" id="npc-sub">Buscam você e levam ao hospital.</span>
+      </span>
+      <span class="state" id="npc-state"></span>
+    </div>
+    <div class="row" id="row-transplant">
+      <span class="key">K</span>
+      <span class="text">
+        <span class="label">Transplante de emergência</span>
+        <span class="sub" id="transplant-sub">Disponível quando o tempo acabar.</span>
+      </span>
+      <span class="state" id="transplant-state"></span>
+    </div>
+  </div>
+
+  <div class="foot" id="foot">
+    <span id="lives"></span>
+  </div>
+</div>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Rajdhani:wght@600;700&display=swap');
+
+  html, body { background: transparent !important; margin: 0; overflow: hidden; }
+
+  /* Servidor: the panel tokens are the project's, the same ones the scoreboard uses - panel
+     #0f0f0f, hairline rgba(255,255,255,.14), #f2f2f2 over #a3a3a3, Rajdhani for the title and
+     Inter for the rows. A second visual language for one screen is how a server starts looking
+     assembled from parts. */
+  #panel {
+    position: absolute;
+    left: 50%;
+    bottom: 8vh;
+    transform: translateX(-50%);
+    width: 460px;
+    background: #0f0f0f;
+    border: 1px solid rgba(255, 255, 255, .14);
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    color: #f2f2f2;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .55);
+  }
+
+  #panel.hidden { display: none; }
+
+  .head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, .14);
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff4d4d;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: .25 } }
+
+  .title {
+    flex: 1;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+  }
+
+  .timer {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: .05em;
+    color: #a3a3a3;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .body { padding: 6px 0; }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+  }
+
+  .row.off { opacity: .38; }
+
+  .key {
+    flex: 0 0 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, .22);
+    border-radius: 3px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .text { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+  .label { font-size: 13px; font-weight: 500; }
+  .sub { font-size: 11px; color: #a3a3a3; }
+
+  .state {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .state.ok { color: #3ecf7e; }
+  .state.warn { color: #ff9500; }
+  .state.bad { color: #ff4d4d; }
+
+  .foot {
+    padding: 9px 16px;
+    border-top: 1px solid rgba(255, 255, 255, .14);
+    font-size: 11px;
+    color: #a3a3a3;
+  }
+
+  .foot.danger { color: #ff9500; }
+</style>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  function setRow(prefix, data) {
+    const row = $('row-' + prefix);
+    const state = $(prefix + '-state');
+
+    row.classList.toggle('off', !data.enabled);
+    state.textContent = data.state || '';
+    state.className = 'state ' + (data.tone || '');
+
+    if (data.sub) $(prefix + '-sub').textContent = data.sub;
+
+    // The first row changes identity when the clock runs out: it stops offering a medic and
+    // becomes the give-up option, which is bound to a different key entirely.
+    if (data.key) { const k = $(prefix + '-key'); if (k) k.textContent = data.key; }
+    if (data.label) { const l = $(prefix + '-label'); if (l) l.textContent = data.label; }
+  }
+
+  window.addEventListener('message', (event) => {
+    const d = event.data;
+    if (d.action !== 'update') return;
+
+    if (!d.show) {
+      $('panel').classList.add('hidden');
+      return;
+    }
+
+    $('panel').classList.remove('hidden');
+    $('timer').textContent = d.timer || '--:--';
+
+    setRow('ems', d.ems);
+    setRow('npc', d.npc);
+    if (d.transplant) setRow('transplant', d.transplant);
+
+    const foot = $('foot');
+    $('lives').textContent = d.lives || '';
+    foot.classList.toggle('danger', !!d.livesDanger);
+    foot.style.display = d.lives ? 'block' : 'none';
+  });
+</script>
